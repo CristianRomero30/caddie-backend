@@ -208,7 +208,7 @@ app.get('/api/caddies', async (req, res) => {
         }
 
         if (estado && estado !== 'Todos') {
-            conditions.push("u.estado = ? COLLATE NOCASE");
+            conditions.push("u.estado = ? ");
             params.push(estado);
         }
 
@@ -216,7 +216,7 @@ app.get('/api/caddies', async (req, res) => {
             SELECT 
                 u.id, u.nombre, u.email, u.estado, u.deporte,
                 p.horas_acumuladas, p.calificacion, p.disponibilidad, p.esta_en_club, p.fecha_entrada_club,
-                (SELECT json_group_array(
+                (SELECT JSON_ARRAYAGG(
                     json_object(
                         'dia', dia_semana, 
                         'manana', manana, 
@@ -229,19 +229,20 @@ app.get('/api/caddies', async (req, res) => {
             WHERE ${conditions.join(' AND ')}
             ORDER BY u.nombre ASC
         `;
-        
-        const caddies = await db.prepare(query).all(...params);
+        const [caddies] = await pool.query(query, params);
 
         // Parsear el JSON del horario
         const result = caddies.map(c => ({
             ...c,
-            horario: JSON.parse(c.horario || '[]')
+            horario: typeof c.horario === 'string' ? JSON.parse(c.horario || '[]') : (c.horario || [])
         }));
 
         res.json(result);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: 'Error recuperando caddies' });
+        console.error('ERROR API CADDIES:', error.message);
+        console.error('QUERY WAS:', query);
+        console.error('PARAMS WERE:', params);
+        res.status(500).json({ success: false, message: 'Error recuperando caddies', detail: error.message, stack: error.stack });
     }
 });
 
