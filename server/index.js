@@ -189,7 +189,7 @@ app.post('/api/auth/login', async (req, res) => {
 
 // Obtener roles
 app.get('/api/roles', async (req, res) => {
-    const roles = db.prepare('SELECT * FROM roles').all();
+    const roles = await db.prepare('SELECT * FROM roles').all();
     res.json(roles);
 });
 
