@@ -1,0 +1,569 @@
+[2026-05-08T15:06:48.391Z] 📅 [CRONOGRAMA] INICIO: Generando para fecha 2026-05-08
+[2026-05-08T15:06:48.393Z] 🔍 Servicios sin asignar: 23
+[2026-05-08T15:06:48.393Z] 📆 Fecha=2026-05-08 | JS Day=5 | DB Day=4
+[2026-05-08T15:06:48.395Z] 👥 Caddies con disponibilidad teórica: 124
+[2026-05-08T15:06:48.397Z] ✅ Turno #208 (06:00) -> Assigned to Michael Stiven Capera Yara (ID: 153)
+[2026-05-08T15:06:48.398Z] ✅ Turno #209 (06:00) -> Assigned to Carlos Caddie (ID: 186)
+[2026-05-08T15:06:48.398Z] ✅ Turno #210 (06:10) -> Assigned to Juan Pérez (ID: 2)
+[2026-05-08T15:06:48.399Z] ✅ Turno #211 (06:30) -> Assigned to Carlos Test (ID: 65)
+[2026-05-08T15:06:48.400Z] ✅ Turno #212 (06:40) -> Assigned to Andrés Camilo Vargas Garcia (ID: 70)
+[2026-05-08T15:06:48.401Z] ✅ Turno #213 (07:00) -> Assigned to Andrés Lorenzo Urrea Bejarano (ID: 73)
+[2026-05-08T15:06:48.401Z] ✅ Turno #214 (07:00) -> Assigned to Brayan  Alejandro Lozano Téllez (ID: 76)
+[2026-05-08T15:06:48.402Z] ✅ Turno #215 (07:10) -> Assigned to Brayan Ricardo Pedraza Alfonso (ID: 78)
+[2026-05-08T15:06:48.402Z] ✅ Turno #216 (07:10) -> Assigned to Brayan Samuel Barragán Gasca (ID: 79)
+[2026-05-08T15:06:48.403Z] ✅ Turno #217 (07:20) -> Assigned to Bryam Steven Cárdenas Cárdenas (ID: 80)
+[2026-05-08T15:06:48.403Z] ✅ Turno #218 (08:00) -> Assigned to Carlos Julián Buitrago Salamanca (ID: 82)
+[2026-05-08T15:06:48.404Z] ✅ Turno #219 (08:40) -> Assigned to Cristian David Barrera Cepeda (ID: 84)
+[2026-05-08T15:06:48.404Z] ✅ Turno #220 (08:50) -> Assigned to Cristian Fabian Baleta  Acosta (ID: 86)
+[2026-05-08T15:06:48.404Z] ✅ Turno #221 (09:00) -> Assigned to Cristian Santiago Cáceres  Charari (ID: 88)
+[2026-05-08T15:06:48.405Z] ✅ Turno #222 (09:00) -> Assigned to Daniel Felipe Duque  Angarita (ID: 91)
+[2026-05-08T15:06:48.405Z] ✅ Turno #223 (09:10) -> Assigned to Diego  Alejandro Sarmiento  Martinez (ID: 97)
+[2026-05-08T15:06:48.405Z] ✅ Turno #224 (09:10) -> Assigned to Diego  Alexander Niño Niño (ID: 98)
+[2026-05-08T15:06:48.406Z] ✅ Turno #225 (09:20) -> Assigned to Diego Andrés Rodríguez Villegas (ID: 100)
+[2026-05-08T15:06:48.406Z] ✅ Turno #226 (09:30) -> Assigned to Diego Fernando Torres Galindo (ID: 101)
+[2026-05-08T15:06:48.407Z] ✅ Turno #227 (09:30) -> Assigned to Dilan Alexander Rodriguez Jimenez (ID: 102)
+[2026-05-08T15:06:48.407Z] ✅ Turno #228 (10:00) -> Assigned to Edgardo Badillo Hernández (ID: 103)
+[2026-05-08T15:06:48.407Z] ✅ Turno #229 (10:10) -> Assigned to Emanuel Varón  Hernández (ID: 106)
+[2026-05-08T15:06:48.408Z] ✅ Turno #230 (12:40) -> Assigned to María García (ID: 3)
+[2026-05-08T15:06:48.409Z] 🛡️ Backup generada para Henry Jhamith Valencia Sanchez (ID: 110)
+[2026-05-08T15:06:48.409Z] 🛡️ Backup generada para Javier  Alexander Castillo Joaqui (ID: 111)
+[2026-05-08T15:06:48.409Z] 🛡️ Backup generada para Jeisson David Puentes Serrano (ID: 114)
+[2026-05-08T15:06:48.410Z] 🛡️ Backup generada para Jhojan Smith Sánchez . (ID: 115)
+[2026-05-08T15:06:48.410Z] 🛡️ Backup generada para Juan  David Rojas  Galindo (ID: 120)
+[2026-05-08T15:06:48.416Z] 🏁 CRONOGRAMA FINALIZADO: {"count":23,"backups":5}
+[2026-05-08T15:17:14.541Z] 📅 [CRONOGRAMA] INICIO: Generando para fecha 2026-05-09
+[2026-05-08T15:17:14.542Z] 🔍 Servicios sin asignar: 44
+[2026-05-08T15:17:14.542Z] 📆 Fecha=2026-05-09 | JS Day=6 | DB Day=5
+[2026-05-08T15:17:14.543Z] 👥 Caddies con disponibilidad teórica: 124
+[2026-05-08T15:17:14.544Z] ✅ Turno #238 (06:00) -> Assigned to María García (ID: 3)
+[2026-05-08T15:17:14.545Z] ✅ Turno #239 (06:00) -> Assigned to Carlos Test (ID: 65)
+[2026-05-08T15:17:14.546Z] ✅ Turno #240 (06:00) -> Assigned to Alejandro Mejia  Arévalo (ID: 66)
+[2026-05-08T15:17:14.547Z] ✅ Turno #241 (06:00) -> Assigned to Alejandro Martinez Infante (ID: 67)
+[2026-05-08T15:17:14.547Z] ✅ Turno #242 (07:00) -> Assigned to Álvaro  Alejandro Piñeros Ortega (ID: 68)
+[2026-05-08T15:17:14.548Z] ✅ Turno #243 (07:00) -> Assigned to Andrés  Mauricio Huertas Nova (ID: 69)
+[2026-05-08T15:17:14.548Z] ✅ Turno #244 (07:00) -> Assigned to Andrés Camilo Vargas Garcia (ID: 70)
+[2026-05-08T15:17:14.549Z] ✅ Turno #245 (07:00) -> Assigned to Andrés Felipe Carreño Ibáñez (ID: 71)
+[2026-05-08T15:17:14.549Z] ✅ Turno #246 (07:00) -> Assigned to Andrés Felipe Rincón Ruiz (ID: 72)
+[2026-05-08T15:17:14.550Z] ✅ Turno #247 (07:00) -> Assigned to Andrés Lorenzo Urrea Bejarano (ID: 73)
+[2026-05-08T15:17:14.550Z] ✅ Turno #248 (07:00) -> Assigned to Andrés Mauricio López Castro (ID: 74)
+[2026-05-08T15:17:14.551Z] ✅ Turno #249 (07:00) -> Assigned to Andrés Santiago Cortes Chávez (ID: 75)
+[2026-05-08T15:17:14.551Z] ✅ Turno #250 (07:00) -> Assigned to Brayan  Alejandro Lozano Téllez (ID: 76)
+[2026-05-08T15:17:14.552Z] ✅ Turno #251 (08:00) -> Assigned to Brayan Alejandro Medina  Ávila (ID: 77)
+[2026-05-08T15:17:14.553Z] ✅ Turno #252 (08:00) -> Assigned to Brayan Ricardo Pedraza Alfonso (ID: 78)
+[2026-05-08T15:17:14.553Z] ✅ Turno #253 (08:00) -> Assigned to Brayan Samuel Barragán Gasca (ID: 79)
+[2026-05-08T15:17:14.554Z] ✅ Turno #254 (08:00) -> Assigned to Bryam Steven Cárdenas Cárdenas (ID: 80)
+[2026-05-08T15:17:14.555Z] ✅ Turno #255 (09:00) -> Assigned to Carlos  Santiago Barrera Moyano (ID: 81)
+[2026-05-08T15:17:14.555Z] ✅ Turno #256 (09:00) -> Assigned to Carlos Julián Buitrago Salamanca (ID: 82)
+[2026-05-08T15:17:14.556Z] ✅ Turno #257 (09:00) -> Assigned to Carlos Sebastián Rodriguez Gonzalez (ID: 83)
+[2026-05-08T15:17:14.557Z] ✅ Turno #258 (09:00) -> Assigned to Cristian David Barrera Cepeda (ID: 84)
+[2026-05-08T15:17:14.557Z] ✅ Turno #259 (09:00) -> Assigned to Cristian David Gómez Gómez (ID: 85)
+[2026-05-08T15:17:14.558Z] ✅ Turno #260 (09:00) -> Assigned to Cristian Fabian Baleta  Acosta (ID: 86)
+[2026-05-08T15:17:14.559Z] ✅ Turno #261 (09:00) -> Assigned to Cristian Roberto Mayorga Martínez (ID: 87)
+[2026-05-08T15:17:14.559Z] ✅ Turno #262 (09:00) -> Assigned to Cristian Santiago Cáceres  Charari (ID: 88)
+[2026-05-08T15:17:14.560Z] ✅ Turno #263 (09:00) -> Assigned to Daniel Alejandro Vargas Yacuma (ID: 89)
+[2026-05-08T15:17:14.561Z] ✅ Turno #264 (09:00) -> Assigned to Daniel Felipe López Zarate (ID: 90)
+[2026-05-08T15:17:14.562Z] ✅ Turno #265 (09:00) -> Assigned to Daniel Felipe Duque  Angarita (ID: 91)
+[2026-05-08T15:17:14.562Z] ✅ Turno #266 (10:00) -> Assigned to Daniel Ricardo Higuera  Sichaca (ID: 92)
+[2026-05-08T15:17:14.563Z] ✅ Turno #267 (10:00) -> Assigned to Daniel Santiago Pinzón Pinto (ID: 93)
+[2026-05-08T15:17:14.563Z] ✅ Turno #268 (10:00) -> Assigned to David  Santiago Buenaver Puentes (ID: 94)
+[2026-05-08T15:17:14.564Z] ✅ Turno #269 (10:00) -> Assigned to David Alejandro Velásquez Alfonso (ID: 95)
+[2026-05-08T15:17:14.564Z] ✅ Turno #270 (10:00) -> Assigned to David Alejandro Castellanos Bohórquez (ID: 96)
+[2026-05-08T15:17:14.565Z] ✅ Turno #271 (11:00) -> Assigned to Diego  Alejandro Sarmiento  Martinez (ID: 97)
+[2026-05-08T15:17:14.565Z] ✅ Turno #272 (11:00) -> Assigned to Diego  Alexander Niño Niño (ID: 98)
+[2026-05-08T15:17:14.566Z] ✅ Turno #273 (12:00) -> Assigned to Diego Alejandro Bohórquez Vargas (ID: 99)
+[2026-05-08T15:17:14.566Z] ✅ Turno #274 (12:00) -> Assigned to Diego Andrés Rodríguez Villegas (ID: 100)
+[2026-05-08T15:17:14.566Z] ✅ Turno #275 (13:00) -> Assigned to Diego Fernando Torres Galindo (ID: 101)
+[2026-05-08T15:17:14.567Z] ✅ Turno #276 (15:00) -> Assigned to Dilan Alexander Rodriguez Jimenez (ID: 102)
+[2026-05-08T15:17:14.567Z] ✅ Turno #277 (15:00) -> Assigned to Edgardo Badillo Hernández (ID: 103)
+[2026-05-08T15:17:14.567Z] ✅ Turno #278 (15:00) -> Assigned to Edward Camilo Arévalo Sosa (ID: 104)
+[2026-05-08T15:17:14.568Z] ✅ Turno #279 (16:00) -> Assigned to Edward Steven Cardozo Cárdenas (ID: 105)
+[2026-05-08T15:17:14.568Z] ✅ Turno #280 (17:00) -> Assigned to Emanuel Varón  Hernández (ID: 106)
+[2026-05-08T15:17:14.568Z] ✅ Turno #281 (17:00) -> Assigned to Emilio Gomez Gomez (ID: 107)
+[2026-05-08T15:17:14.569Z] 🛡️ Backup generada para Juan Pérez (ID: 2)
+[2026-05-08T15:17:14.569Z] 🛡️ Backup generada para Erick  Santiago Montañez Guerra (ID: 108)
+[2026-05-08T15:17:14.570Z] 🛡️ Backup generada para Gabriel  Santiago Quiroga Rincón (ID: 109)
+[2026-05-08T15:17:14.570Z] 🛡️ Backup generada para Henry Jhamith Valencia Sanchez (ID: 110)
+[2026-05-08T15:17:14.570Z] 🛡️ Backup generada para Javier  Alexander Castillo Joaqui (ID: 111)
+[2026-05-08T15:17:14.576Z] 🏁 CRONOGRAMA FINALIZADO: {"count":44,"backups":5}
+[2026-05-08T15:51:15.330Z] 📅 [CRONOGRAMA] INICIO: Generando para fecha 2026-05-08
+[2026-05-08T15:51:15.331Z] 🔍 Servicios sin asignar: 23
+[2026-05-08T15:51:15.332Z] 📆 Fecha=2026-05-08 | JS Day=5 | DB Day=4
+[2026-05-08T15:51:15.332Z] 👥 Caddies con disponibilidad teórica: 124
+[2026-05-08T15:51:15.333Z] ✅ Turno #1 (06:00) -> Assigned to Michael Stiven Capera Yara (ID: 153)
+[2026-05-08T15:51:15.334Z] ✅ Turno #2 (06:00) -> Assigned to Carlos Caddie (ID: 186)
+[2026-05-08T15:51:15.335Z] ✅ Turno #3 (06:10) -> Assigned to Juan Pérez (ID: 2)
+[2026-05-08T15:51:15.335Z] ✅ Turno #4 (06:30) -> Assigned to Carlos Test (ID: 65)
+[2026-05-08T15:51:15.336Z] ✅ Turno #5 (06:40) -> Assigned to Andrés Camilo Vargas Garcia (ID: 70)
+[2026-05-08T15:51:15.336Z] ✅ Turno #6 (07:00) -> Assigned to Andrés Lorenzo Urrea Bejarano (ID: 73)
+[2026-05-08T15:51:15.337Z] ✅ Turno #7 (07:00) -> Assigned to Brayan  Alejandro Lozano Téllez (ID: 76)
+[2026-05-08T15:51:15.337Z] ✅ Turno #8 (07:10) -> Assigned to Brayan Ricardo Pedraza Alfonso (ID: 78)
+[2026-05-08T15:51:15.337Z] ✅ Turno #9 (07:10) -> Assigned to Brayan Samuel Barragán Gasca (ID: 79)
+[2026-05-08T15:51:15.338Z] ✅ Turno #10 (07:20) -> Assigned to Bryam Steven Cárdenas Cárdenas (ID: 80)
+[2026-05-08T15:51:15.338Z] ✅ Turno #11 (08:00) -> Assigned to Carlos Julián Buitrago Salamanca (ID: 82)
+[2026-05-08T15:51:15.339Z] ✅ Turno #12 (08:40) -> Assigned to Cristian David Barrera Cepeda (ID: 84)
+[2026-05-08T15:51:15.339Z] ✅ Turno #13 (08:50) -> Assigned to Cristian Fabian Baleta  Acosta (ID: 86)
+[2026-05-08T15:51:15.339Z] ✅ Turno #14 (09:00) -> Assigned to Cristian Santiago Cáceres  Charari (ID: 88)
+[2026-05-08T15:51:15.340Z] ✅ Turno #15 (09:00) -> Assigned to Daniel Felipe Duque  Angarita (ID: 91)
+[2026-05-08T15:51:15.340Z] ✅ Turno #16 (09:10) -> Assigned to Diego  Alejandro Sarmiento  Martinez (ID: 97)
+[2026-05-08T15:51:15.340Z] ✅ Turno #17 (09:10) -> Assigned to Diego  Alexander Niño Niño (ID: 98)
+[2026-05-08T15:51:15.341Z] ✅ Turno #18 (09:20) -> Assigned to Diego Andrés Rodríguez Villegas (ID: 100)
+[2026-05-08T15:51:15.341Z] ✅ Turno #19 (09:30) -> Assigned to Diego Fernando Torres Galindo (ID: 101)
+[2026-05-08T15:51:15.341Z] ✅ Turno #20 (09:30) -> Assigned to Dilan Alexander Rodriguez Jimenez (ID: 102)
+[2026-05-08T15:51:15.342Z] ✅ Turno #21 (10:00) -> Assigned to Edgardo Badillo Hernández (ID: 103)
+[2026-05-08T15:51:15.342Z] ✅ Turno #22 (10:10) -> Assigned to Emanuel Varón  Hernández (ID: 106)
+[2026-05-08T15:51:15.342Z] ✅ Turno #23 (12:40) -> Assigned to María García (ID: 3)
+[2026-05-08T15:51:15.343Z] 🛡️ Backup generada para Henry Jhamith Valencia Sanchez (ID: 110)
+[2026-05-08T15:51:15.343Z] 🛡️ Backup generada para Javier  Alexander Castillo Joaqui (ID: 111)
+[2026-05-08T15:51:15.344Z] 🛡️ Backup generada para Jeisson David Puentes Serrano (ID: 114)
+[2026-05-08T15:51:15.344Z] 🛡️ Backup generada para Jhojan Smith Sánchez . (ID: 115)
+[2026-05-08T15:51:15.344Z] 🛡️ Backup generada para Juan  David Rojas  Galindo (ID: 120)
+[2026-05-08T15:51:15.349Z] 🏁 CRONOGRAMA FINALIZADO: {"count":23,"backups":5}
+[2026-05-13T16:22:24.863Z] 📅 [CRONOGRAMA] INICIO: Generando para fecha 2026-05-14
+[2026-05-13T16:22:24.864Z] 🔍 Servicios sin asignar: 22
+[2026-05-13T16:22:24.865Z] 📆 Fecha=2026-05-14 | JS Day=4 | DB Day=3
+[2026-05-13T16:22:24.866Z] 👥 Caddies con disponibilidad teórica: 123
+[2026-05-13T16:22:24.867Z] ✅ Turno #1 (06:00) -> Assigned to Juan Pérez (ID: 2)
+[2026-05-13T16:22:24.867Z] ✅ Turno #2 (06:00) -> Assigned to Andrés Camilo Vargas Garcia (ID: 70)
+[2026-05-13T16:22:24.868Z] ✅ Turno #3 (06:10) -> Assigned to Andrés Lorenzo Urrea Bejarano (ID: 73)
+[2026-05-13T16:22:24.869Z] ✅ Turno #4 (06:30) -> Assigned to Brayan  Alejandro Lozano Téllez (ID: 76)
+[2026-05-13T16:22:24.869Z] ✅ Turno #5 (06:40) -> Assigned to Brayan Ricardo Pedraza Alfonso (ID: 78)
+[2026-05-13T16:22:24.870Z] ✅ Turno #6 (07:00) -> Assigned to Brayan Samuel Barragán Gasca (ID: 79)
+[2026-05-13T16:22:24.870Z] ✅ Turno #7 (07:00) -> Assigned to Bryam Steven Cárdenas Cárdenas (ID: 80)
+[2026-05-13T16:22:24.871Z] ✅ Turno #8 (07:10) -> Assigned to Carlos Julián Buitrago Salamanca (ID: 82)
+[2026-05-13T16:22:24.871Z] ✅ Turno #9 (07:10) -> Assigned to Cristian David Barrera Cepeda (ID: 84)
+[2026-05-13T16:22:24.872Z] ✅ Turno #10 (07:20) -> Assigned to Cristian Fabian Baleta  Acosta (ID: 86)
+[2026-05-13T16:22:24.872Z] ✅ Turno #11 (08:00) -> Assigned to Cristian Santiago Cáceres  Charari (ID: 88)
+[2026-05-13T16:22:24.872Z] ✅ Turno #12 (08:40) -> Assigned to Daniel Felipe Duque  Angarita (ID: 91)
+[2026-05-13T16:22:24.873Z] ✅ Turno #13 (08:50) -> Assigned to Diego  Alejandro Sarmiento  Martinez (ID: 97)
+[2026-05-13T16:22:24.873Z] ✅ Turno #14 (09:00) -> Assigned to Diego  Alexander Niño Niño (ID: 98)
+[2026-05-13T16:22:24.874Z] ✅ Turno #15 (09:00) -> Assigned to Diego Andrés Rodríguez Villegas (ID: 100)
+[2026-05-13T16:22:24.874Z] ✅ Turno #16 (09:10) -> Assigned to Diego Fernando Torres Galindo (ID: 101)
+[2026-05-13T16:22:24.874Z] ✅ Turno #17 (09:10) -> Assigned to Dilan Alexander Rodriguez Jimenez (ID: 102)
+[2026-05-13T16:22:24.875Z] ✅ Turno #18 (09:20) -> Assigned to Edgardo Badillo Hernández (ID: 103)
+[2026-05-13T16:22:24.875Z] ✅ Turno #19 (09:30) -> Assigned to Emanuel Varón  Hernández (ID: 106)
+[2026-05-13T16:22:24.876Z] ✅ Turno #20 (09:30) -> Assigned to Henry Jhamith Valencia Sanchez (ID: 110)
+[2026-05-13T16:22:24.876Z] ✅ Turno #21 (10:00) -> Assigned to Javier  Alexander Castillo Joaqui (ID: 111)
+[2026-05-13T16:22:24.877Z] ✅ Turno #22 (10:10) -> Assigned to Jeisson David Puentes Serrano (ID: 114)
+[2026-05-13T16:22:24.877Z] 🛡️ Backup generada para María García (ID: 3)
+[2026-05-13T16:22:24.878Z] 🛡️ Backup generada para Jhojan Smith Sánchez . (ID: 115)
+[2026-05-13T16:22:24.878Z] 🛡️ Backup generada para Juan  David Rojas  Galindo (ID: 120)
+[2026-05-13T16:22:24.879Z] 🛡️ Backup generada para Juan  Felipe Galindo  Salazar (ID: 124)
+[2026-05-13T16:22:24.879Z] 🛡️ Backup generada para Juan  Pablo Fragozo Jiménez (ID: 126)
+[2026-05-13T16:22:24.884Z] 🏁 CRONOGRAMA FINALIZADO: {"count":22,"backups":5}
+[2026-05-14T01:59:25.847Z] 📅 [CRONOGRAMA] INICIO: Generando para fecha 2026-05-13
+[2026-05-14T01:59:25.849Z] 🔍 Servicios sin asignar: 1
+[2026-05-14T01:59:25.850Z] 📆 Fecha=2026-05-13 | JS Day=3 | DB Day=2
+[2026-05-14T01:59:25.851Z] 👥 Caddies con disponibilidad teórica: 121
+[2026-05-14T01:59:25.853Z] ✅ Turno #1 (06:00) -> Assigned to Juan Pérez (ID: 2)
+[2026-05-14T01:59:25.854Z] 🛡️ Backup generada para María García (ID: 3)
+[2026-05-14T01:59:25.855Z] 🛡️ Backup generada para Andrés Camilo Vargas Garcia (ID: 70)
+[2026-05-14T01:59:25.856Z] 🛡️ Backup generada para Andrés Lorenzo Urrea Bejarano (ID: 73)
+[2026-05-14T01:59:25.856Z] 🛡️ Backup generada para Brayan  Alejandro Lozano Téllez (ID: 76)
+[2026-05-14T01:59:25.857Z] 🛡️ Backup generada para Brayan Ricardo Pedraza Alfonso (ID: 78)
+[2026-05-14T01:59:25.863Z] 🏁 CRONOGRAMA FINALIZADO: {"count":1,"backups":5}
+[2026-05-14T02:23:49.413Z] 📅 [CRONOGRAMA] INICIO: Generando para fecha 2026-05-13
+[2026-05-14T02:23:49.414Z] 🔍 Servicios sin asignar: 3
+[2026-05-14T02:23:49.414Z] 📆 Fecha=2026-05-13 | JS Day=3 | DB Day=2
+[2026-05-14T02:23:49.415Z] 👥 Caddies con disponibilidad teórica: 121
+[2026-05-14T02:23:49.417Z] ✅ Turno #3 (06:10) -> Assigned to Juan Pérez (ID: 2)
+[2026-05-14T02:23:49.418Z] ✅ Turno #1 (20:00:00 p. m.) -> Assigned to María García (ID: 3)
+[2026-05-14T02:23:49.418Z] ✅ Turno #2 (20:00:00 p. m.) -> Assigned to Andrés Camilo Vargas Garcia (ID: 70)
+[2026-05-14T02:23:49.419Z] 🛡️ Backup generada para Andrés Lorenzo Urrea Bejarano (ID: 73)
+[2026-05-14T02:23:49.420Z] 🛡️ Backup generada para Brayan  Alejandro Lozano Téllez (ID: 76)
+[2026-05-14T02:23:49.420Z] 🛡️ Backup generada para Brayan Ricardo Pedraza Alfonso (ID: 78)
+[2026-05-14T02:23:49.421Z] 🛡️ Backup generada para Brayan Samuel Barragán Gasca (ID: 79)
+[2026-05-14T02:23:49.421Z] 🛡️ Backup generada para Bryam Steven Cárdenas Cárdenas (ID: 80)
+[2026-05-14T02:23:49.431Z] 🏁 CRONOGRAMA FINALIZADO: {"count":3,"backups":5}
+[2026-05-14T02:24:23.804Z] 📅 [CRONOGRAMA] INICIO: Generando para fecha 2026-05-14
+[2026-05-14T02:24:23.805Z] 🔍 Servicios sin asignar: 20
+[2026-05-14T02:24:23.805Z] 📆 Fecha=2026-05-14 | JS Day=4 | DB Day=3
+[2026-05-14T02:24:23.806Z] 👥 Caddies con disponibilidad teórica: 121
+[2026-05-14T02:24:23.807Z] ✅ Turno #4 (06:30) -> Assigned to Juan Pérez (ID: 2)
+[2026-05-14T02:24:23.808Z] ✅ Turno #5 (06:40) -> Assigned to Andrés Camilo Vargas Garcia (ID: 70)
+[2026-05-14T02:24:23.808Z] ✅ Turno #6 (07:00) -> Assigned to Andrés Lorenzo Urrea Bejarano (ID: 73)
+[2026-05-14T02:24:23.809Z] ✅ Turno #7 (07:00) -> Assigned to Brayan  Alejandro Lozano Téllez (ID: 76)
+[2026-05-14T02:24:23.809Z] ✅ Turno #8 (07:10) -> Assigned to Brayan Ricardo Pedraza Alfonso (ID: 78)
+[2026-05-14T02:24:23.809Z] ✅ Turno #9 (07:10) -> Assigned to Brayan Samuel Barragán Gasca (ID: 79)
+[2026-05-14T02:24:23.810Z] ✅ Turno #10 (07:20) -> Assigned to Bryam Steven Cárdenas Cárdenas (ID: 80)
+[2026-05-14T02:24:23.810Z] ✅ Turno #11 (08:00) -> Assigned to Carlos Julián Buitrago Salamanca (ID: 82)
+[2026-05-14T02:24:23.811Z] ✅ Turno #12 (08:40) -> Assigned to Cristian David Barrera Cepeda (ID: 84)
+[2026-05-14T02:24:23.811Z] ✅ Turno #13 (08:50) -> Assigned to Cristian Fabian Baleta  Acosta (ID: 86)
+[2026-05-14T02:24:23.812Z] ✅ Turno #14 (09:00) -> Assigned to Cristian Santiago Cáceres  Charari (ID: 88)
+[2026-05-14T02:24:23.812Z] ✅ Turno #15 (09:00) -> Assigned to Daniel Felipe Duque  Angarita (ID: 91)
+[2026-05-14T02:24:23.813Z] ✅ Turno #16 (09:10) -> Assigned to Diego  Alejandro Sarmiento  Martinez (ID: 97)
+[2026-05-14T02:24:23.813Z] ✅ Turno #17 (09:10) -> Assigned to Diego  Alexander Niño Niño (ID: 98)
+[2026-05-14T02:24:23.813Z] ✅ Turno #18 (09:20) -> Assigned to Diego Andrés Rodríguez Villegas (ID: 100)
+[2026-05-14T02:24:23.814Z] ✅ Turno #19 (09:30) -> Assigned to Diego Fernando Torres Galindo (ID: 101)
+[2026-05-14T02:24:23.814Z] ✅ Turno #20 (09:30) -> Assigned to Dilan Alexander Rodriguez Jimenez (ID: 102)
+[2026-05-14T02:24:23.815Z] ✅ Turno #21 (10:00) -> Assigned to Edgardo Badillo Hernández (ID: 103)
+[2026-05-14T02:24:23.815Z] ✅ Turno #22 (10:10) -> Assigned to Emanuel Varón  Hernández (ID: 106)
+[2026-05-14T02:24:23.816Z] ✅ Turno #23 (12:40) -> Assigned to María García (ID: 3)
+[2026-05-14T02:24:23.816Z] 🛡️ Backup generada para Henry Jhamith Valencia Sanchez (ID: 110)
+[2026-05-14T02:24:23.817Z] 🛡️ Backup generada para Javier  Alexander Castillo Joaqui (ID: 111)
+[2026-05-14T02:24:23.817Z] 🛡️ Backup generada para Jeisson David Puentes Serrano (ID: 114)
+[2026-05-14T02:24:23.818Z] 🛡️ Backup generada para Jhojan Smith Sánchez . (ID: 115)
+[2026-05-14T02:24:23.818Z] 🛡️ Backup generada para Juan  David Rojas  Galindo (ID: 120)
+[2026-05-14T02:24:23.824Z] 🏁 CRONOGRAMA FINALIZADO: {"count":20,"backups":5}
+[2026-05-14T02:31:16.525Z] 📅 [CRONOGRAMA] INICIO: Generando para fecha 2026-05-13
+[2026-05-14T02:31:16.526Z] 🔍 Servicios sin asignar: 3
+[2026-05-14T02:31:16.527Z] 📆 Fecha=2026-05-13 | JS Day=3 | DB Day=2
+[2026-05-14T02:31:16.527Z] 👥 Caddies con disponibilidad teórica: 121
+[2026-05-14T02:31:16.529Z] ✅ Turno #3 (09:50) -> Assigned to Juan Pérez (ID: 2)
+[2026-05-14T02:31:16.530Z] ✅ Turno #1 (21:30) -> Assigned to María García (ID: 3)
+[2026-05-14T02:31:16.531Z] ✅ Turno #2 (21:45) -> Assigned to Andrés Camilo Vargas Garcia (ID: 70)
+[2026-05-14T02:31:16.531Z] 🛡️ Backup generada para Andrés Lorenzo Urrea Bejarano (ID: 73)
+[2026-05-14T02:31:16.532Z] 🛡️ Backup generada para Brayan  Alejandro Lozano Téllez (ID: 76)
+[2026-05-14T02:31:16.532Z] 🛡️ Backup generada para Brayan Ricardo Pedraza Alfonso (ID: 78)
+[2026-05-14T02:31:16.533Z] 🛡️ Backup generada para Brayan Samuel Barragán Gasca (ID: 79)
+[2026-05-14T02:31:16.534Z] 🛡️ Backup generada para Bryam Steven Cárdenas Cárdenas (ID: 80)
+[2026-05-14T02:31:16.540Z] 🏁 CRONOGRAMA FINALIZADO: {"count":3,"backups":5}
+[2026-05-14T02:43:55.927Z] 📅 [CRONOGRAMA] INICIO: Generando para fecha 2026-05-13
+[2026-05-14T02:43:55.928Z] 🔍 Servicios sin asignar: 3
+[2026-05-14T02:43:55.928Z] 📆 Fecha=2026-05-13 | JS Day=3 | DB Day=2
+[2026-05-14T02:43:55.929Z] 👥 Caddies con disponibilidad teórica: 121
+[2026-05-14T02:43:55.930Z] ✅ Turno #3 (21:30) -> Assigned to Juan Pérez (ID: 2)
+[2026-05-14T02:43:55.931Z] ✅ Turno #1 (21:45) -> Assigned to María García (ID: 3)
+[2026-05-14T02:43:55.931Z] ✅ Turno #2 (21:55) -> Assigned to Andrés Camilo Vargas Garcia (ID: 70)
+[2026-05-14T02:43:55.932Z] 🛡️ Backup generada para Andrés Lorenzo Urrea Bejarano (ID: 73)
+[2026-05-14T02:43:55.932Z] 🛡️ Backup generada para Brayan  Alejandro Lozano Téllez (ID: 76)
+[2026-05-14T02:43:55.933Z] 🛡️ Backup generada para Brayan Ricardo Pedraza Alfonso (ID: 78)
+[2026-05-14T02:43:55.933Z] 🛡️ Backup generada para Brayan Samuel Barragán Gasca (ID: 79)
+[2026-05-14T02:43:55.933Z] 🛡️ Backup generada para Bryam Steven Cárdenas Cárdenas (ID: 80)
+[2026-05-14T02:43:55.938Z] 🏁 CRONOGRAMA FINALIZADO: {"count":3,"backups":5}
+[2026-05-14T02:51:32.396Z] 📅 [CRONOGRAMA] INICIO: Generando para fecha 2026-05-13
+[2026-05-14T02:51:32.398Z] 🔍 Servicios sin asignar: 3
+[2026-05-14T02:51:32.398Z] 📆 Fecha=2026-05-13 | JS Day=3 | DB Day=2
+[2026-05-14T02:51:32.399Z] 👥 Caddies con disponibilidad teórica: 121
+[2026-05-14T02:51:32.402Z] ✅ Turno #3 (21:30) -> Assigned to Juan Pérez (ID: 2)
+[2026-05-14T02:51:32.402Z] ✅ Turno #1 (21:45) -> Assigned to María García (ID: 3)
+[2026-05-14T02:51:32.403Z] ✅ Turno #2 (21:55) -> Assigned to Andrés Camilo Vargas Garcia (ID: 70)
+[2026-05-14T02:51:32.409Z] 🏁 CRONOGRAMA FINALIZADO: {"count":3,"backups":0}
+[2026-05-14T02:56:43.517Z] 📅 [CRONOGRAMA] INICIO: Generando para fecha 2026-05-14
+[2026-05-14T02:56:43.518Z] 🔍 Servicios sin asignar: 20
+[2026-05-14T02:56:43.518Z] 📆 Fecha=2026-05-14 | JS Day=4 | DB Day=3
+[2026-05-14T02:56:43.519Z] 👥 Caddies con disponibilidad teórica: 121
+[2026-05-14T02:56:43.528Z] ✅ Turno #4 (06:30) -> Assigned to Juan Pérez (ID: 2)
+[2026-05-14T02:56:43.528Z] ✅ Turno #5 (06:40) -> Assigned to Andrés Lorenzo Urrea Bejarano (ID: 73)
+[2026-05-14T02:56:43.528Z] ✅ Turno #6 (07:00) -> Assigned to Brayan  Alejandro Lozano Téllez (ID: 76)
+[2026-05-14T02:56:43.529Z] ✅ Turno #7 (07:00) -> Assigned to Brayan Ricardo Pedraza Alfonso (ID: 78)
+[2026-05-14T02:56:43.529Z] ✅ Turno #8 (07:10) -> Assigned to Brayan Samuel Barragán Gasca (ID: 79)
+[2026-05-14T02:56:43.529Z] ✅ Turno #9 (07:10) -> Assigned to Bryam Steven Cárdenas Cárdenas (ID: 80)
+[2026-05-14T02:56:43.530Z] ✅ Turno #10 (07:20) -> Assigned to Carlos Julián Buitrago Salamanca (ID: 82)
+[2026-05-14T02:56:43.530Z] ✅ Turno #11 (08:00) -> Assigned to Cristian David Barrera Cepeda (ID: 84)
+[2026-05-14T02:56:43.530Z] ✅ Turno #12 (08:40) -> Assigned to Cristian Fabian Baleta  Acosta (ID: 86)
+[2026-05-14T02:56:43.531Z] ✅ Turno #13 (08:50) -> Assigned to Cristian Santiago Cáceres  Charari (ID: 88)
+[2026-05-14T02:56:43.531Z] ✅ Turno #14 (09:00) -> Assigned to Daniel Felipe Duque  Angarita (ID: 91)
+[2026-05-14T02:56:43.532Z] ✅ Turno #15 (09:00) -> Assigned to Diego  Alejandro Sarmiento  Martinez (ID: 97)
+[2026-05-14T02:56:43.532Z] ✅ Turno #16 (09:10) -> Assigned to Diego  Alexander Niño Niño (ID: 98)
+[2026-05-14T02:56:43.532Z] ✅ Turno #17 (09:10) -> Assigned to Diego Andrés Rodríguez Villegas (ID: 100)
+[2026-05-14T02:56:43.533Z] ✅ Turno #18 (09:20) -> Assigned to Diego Fernando Torres Galindo (ID: 101)
+[2026-05-14T02:56:43.533Z] ✅ Turno #19 (09:30) -> Assigned to Dilan Alexander Rodriguez Jimenez (ID: 102)
+[2026-05-14T02:56:43.534Z] ✅ Turno #20 (09:30) -> Assigned to Edgardo Badillo Hernández (ID: 103)
+[2026-05-14T02:56:43.534Z] ✅ Turno #21 (10:00) -> Assigned to Emanuel Varón  Hernández (ID: 106)
+[2026-05-14T02:56:43.535Z] ✅ Turno #22 (10:10) -> Assigned to Henry Jhamith Valencia Sanchez (ID: 110)
+[2026-05-14T02:56:43.535Z] ✅ Turno #23 (12:40) -> Assigned to María García (ID: 3)
+[2026-05-14T02:56:43.540Z] 🏁 CRONOGRAMA FINALIZADO: {"count":20,"backups":0}
+[2026-05-14T15:03:05.239Z] 📅 [CRONOGRAMA] INICIO: Generando para fecha 2026-05-14
+[2026-05-14T15:03:05.241Z] 🔍 Servicios sin asignar: 3
+[2026-05-14T15:03:05.241Z] 📆 Fecha=2026-05-14 | JS Day=4 | DB Day=3
+[2026-05-14T15:03:05.242Z] 👥 Caddies con disponibilidad teórica: 120
+[2026-05-14T15:03:05.243Z] ✅ Turno #30 (21:30) -> Assigned to Alejandro Martinez Infante (ID: 67)
+[2026-05-14T15:03:05.244Z] ✅ Turno #28 (21:45) -> Assigned to Andrés Camilo Vargas Garcia (ID: 70)
+[2026-05-14T15:03:05.244Z] ✅ Turno #29 (21:55) -> Assigned to Juan Pérez (ID: 2)
+[2026-05-14T15:03:05.249Z] 🏁 CRONOGRAMA FINALIZADO: {"count":3,"backups":0}
+[2026-05-14T21:50:03.682Z] 📅 [CRONOGRAMA] INICIO: Generando para fecha 2026-05-16
+[2026-05-14T21:50:03.684Z] 🔍 Servicios sin asignar: 23
+[2026-05-14T21:50:03.685Z] 📆 Fecha=2026-05-16 | JS Day=6 | DB Day=5
+[2026-05-14T21:50:03.686Z] 👥 Caddies con disponibilidad teórica: 0
+[2026-05-14T21:50:03.686Z] ⚠️ No caddie found for Turno #1 (06:00) [Morning=true]
+[2026-05-14T21:50:03.687Z] ⚠️ No caddie found for Turno #2 (06:00) [Morning=true]
+[2026-05-14T21:50:03.687Z] ⚠️ No caddie found for Turno #3 (06:10) [Morning=true]
+[2026-05-14T21:50:03.688Z] ⚠️ No caddie found for Turno #4 (06:30) [Morning=true]
+[2026-05-14T21:50:03.688Z] ⚠️ No caddie found for Turno #5 (06:40) [Morning=true]
+[2026-05-14T21:50:03.689Z] ⚠️ No caddie found for Turno #6 (07:00) [Morning=true]
+[2026-05-14T21:50:03.689Z] ⚠️ No caddie found for Turno #7 (07:00) [Morning=true]
+[2026-05-14T21:50:03.690Z] ⚠️ No caddie found for Turno #8 (07:10) [Morning=true]
+[2026-05-14T21:50:03.691Z] ⚠️ No caddie found for Turno #9 (07:10) [Morning=true]
+[2026-05-14T21:50:03.691Z] ⚠️ No caddie found for Turno #10 (07:20) [Morning=true]
+[2026-05-14T21:50:03.692Z] ⚠️ No caddie found for Turno #11 (08:00) [Morning=true]
+[2026-05-14T21:50:03.692Z] ⚠️ No caddie found for Turno #12 (08:40) [Morning=true]
+[2026-05-14T21:50:03.693Z] ⚠️ No caddie found for Turno #13 (08:50) [Morning=true]
+[2026-05-14T21:50:03.693Z] ⚠️ No caddie found for Turno #14 (09:00) [Morning=true]
+[2026-05-14T21:50:03.694Z] ⚠️ No caddie found for Turno #15 (09:00) [Morning=true]
+[2026-05-14T21:50:03.694Z] ⚠️ No caddie found for Turno #16 (09:10) [Morning=true]
+[2026-05-14T21:50:03.695Z] ⚠️ No caddie found for Turno #17 (09:10) [Morning=true]
+[2026-05-14T21:50:03.695Z] ⚠️ No caddie found for Turno #18 (09:20) [Morning=true]
+[2026-05-14T21:50:03.696Z] ⚠️ No caddie found for Turno #19 (09:30) [Morning=true]
+[2026-05-14T21:50:03.697Z] ⚠️ No caddie found for Turno #20 (09:30) [Morning=true]
+[2026-05-14T21:50:03.697Z] ⚠️ No caddie found for Turno #21 (10:00) [Morning=true]
+[2026-05-14T21:50:03.698Z] ⚠️ No caddie found for Turno #22 (10:10) [Morning=true]
+[2026-05-14T21:50:03.698Z] ⚠️ No caddie found for Turno #23 (12:40) [Morning=false]
+[2026-05-14T21:50:03.699Z] 🏁 CRONOGRAMA FINALIZADO: {"count":0,"backups":0}
+[2026-05-19T16:58:06.667Z] 📅 [CRONOGRAMA] INICIO: Generando para fecha 2026-05-20
+[2026-05-19T16:58:06.668Z] 🔍 Servicios sin asignar: 20
+[2026-05-19T16:58:06.669Z] 📆 Fecha=2026-05-20 | JS Day=3 | DB Day=2
+[2026-05-19T16:58:06.670Z] 👥 Caddies con disponibilidad teórica: 121
+[2026-05-19T16:58:06.671Z] ✅ Turno #4 (06:30) -> Assigned to Juan Pérez (ID: 2)
+[2026-05-19T16:58:06.672Z] ✅ Turno #5 (06:40) -> Assigned to Andrés Camilo Vargas Garcia (ID: 70)
+[2026-05-19T16:58:06.673Z] ✅ Turno #6 (07:00) -> Assigned to Andrés Lorenzo Urrea Bejarano (ID: 73)
+[2026-05-19T16:58:06.673Z] ✅ Turno #7 (07:00) -> Assigned to Brayan Ricardo Pedraza Alfonso (ID: 78)
+[2026-05-19T16:58:06.674Z] ✅ Turno #8 (07:10) -> Assigned to Brayan Samuel Barragán Gasca (ID: 79)
+[2026-05-19T16:58:06.675Z] ✅ Turno #9 (07:10) -> Assigned to Bryam Steven Cárdenas Cárdenas (ID: 80)
+[2026-05-19T16:58:06.675Z] ✅ Turno #10 (07:20) -> Assigned to Carlos Julián Buitrago Salamanca (ID: 82)
+[2026-05-19T16:58:06.676Z] ✅ Turno #11 (08:00) -> Assigned to Cristian David Barrera Cepeda (ID: 84)
+[2026-05-19T16:58:06.676Z] ✅ Turno #12 (08:40) -> Assigned to Cristian Fabian Baleta  Acosta (ID: 86)
+[2026-05-19T16:58:06.677Z] ✅ Turno #13 (08:50) -> Assigned to Cristian Santiago Cáceres  Charari (ID: 88)
+[2026-05-19T16:58:06.677Z] ✅ Turno #14 (09:00) -> Assigned to Daniel Felipe Duque  Angarita (ID: 91)
+[2026-05-19T16:58:06.678Z] ✅ Turno #15 (09:00) -> Assigned to Diego  Alejandro Sarmiento  Martinez (ID: 97)
+[2026-05-19T16:58:06.679Z] ✅ Turno #16 (09:10) -> Assigned to Diego  Alexander Niño Niño (ID: 98)
+[2026-05-19T16:58:06.679Z] ✅ Turno #17 (09:10) -> Assigned to Diego Andrés Rodríguez Villegas (ID: 100)
+[2026-05-19T16:58:06.680Z] ✅ Turno #18 (09:20) -> Assigned to Diego Fernando Torres Galindo (ID: 101)
+[2026-05-19T16:58:06.681Z] ✅ Turno #19 (09:30) -> Assigned to Dilan Alexander Rodriguez Jimenez (ID: 102)
+[2026-05-19T16:58:06.681Z] ✅ Turno #20 (09:30) -> Assigned to Edgardo Badillo Hernández (ID: 103)
+[2026-05-19T16:58:06.682Z] ✅ Turno #21 (10:00) -> Assigned to Emanuel Varón  Hernández (ID: 106)
+[2026-05-19T16:58:06.682Z] ✅ Turno #22 (10:10) -> Assigned to Henry Jhamith Valencia Sanchez (ID: 110)
+[2026-05-19T16:58:06.683Z] ✅ Turno #23 (12:40) -> Assigned to María García (ID: 3)
+[2026-05-19T16:58:06.688Z] 🏁 CRONOGRAMA FINALIZADO: {"count":20,"backups":0}
+[2026-05-19T16:58:24.375Z] 📅 [CRONOGRAMA] INICIO: Generando para fecha 2026-05-19
+[2026-05-19T16:58:24.376Z] 🔍 Servicios sin asignar: 3
+[2026-05-19T16:58:24.377Z] 📆 Fecha=2026-05-19 | JS Day=2 | DB Day=1
+[2026-05-19T16:58:24.378Z] 👥 Caddies con disponibilidad teórica: 121
+[2026-05-19T16:58:24.379Z] ✅ Turno #2 (12:04) -> Assigned to María García (ID: 3)
+[2026-05-19T16:58:24.380Z] ✅ Turno #3 (12:35) -> Assigned to Juan Pérez (ID: 2)
+[2026-05-19T16:58:24.380Z] ✅ Turno #1 (12:45) -> Assigned to Andrés Camilo Vargas Garcia (ID: 70)
+[2026-05-19T16:58:24.386Z] 🏁 CRONOGRAMA FINALIZADO: {"count":3,"backups":0}
+[2026-05-21T16:12:22.223Z] 📅 [CRONOGRAMA] INICIO: Generando para fecha 2026-05-22
+[2026-05-21T16:12:22.224Z] 🔍 Servicios sin asignar: 20
+[2026-05-21T16:12:22.224Z] 📆 Fecha=2026-05-22 | JS Day=5 | DB Day=4
+[2026-05-21T16:12:22.225Z] 👥 Caddies con disponibilidad teórica: 121
+[2026-05-21T16:12:22.227Z] ✅ Turno #4 (06:30) -> Assigned to Juan Pérez (ID: 2)
+[2026-05-21T16:12:22.228Z] ✅ Turno #5 (06:40) -> Assigned to Andrés Camilo Vargas Garcia (ID: 70)
+[2026-05-21T16:12:22.229Z] ✅ Turno #6 (07:00) -> Assigned to Andrés Lorenzo Urrea Bejarano (ID: 73)
+[2026-05-21T16:12:22.229Z] ✅ Turno #7 (07:00) -> Assigned to Brayan Ricardo Pedraza Alfonso (ID: 78)
+[2026-05-21T16:12:22.230Z] ✅ Turno #8 (07:10) -> Assigned to Brayan Samuel Barragán Gasca (ID: 79)
+[2026-05-21T16:12:22.230Z] ✅ Turno #9 (07:10) -> Assigned to Bryam Steven Cárdenas Cárdenas (ID: 80)
+[2026-05-21T16:12:22.231Z] ✅ Turno #10 (07:20) -> Assigned to Carlos Julián Buitrago Salamanca (ID: 82)
+[2026-05-21T16:12:22.232Z] ✅ Turno #11 (08:00) -> Assigned to Cristian David Barrera Cepeda (ID: 84)
+[2026-05-21T16:12:22.233Z] ✅ Turno #12 (08:40) -> Assigned to Cristian Fabian Baleta  Acosta (ID: 86)
+[2026-05-21T16:12:22.233Z] ✅ Turno #13 (08:50) -> Assigned to Cristian Santiago Cáceres  Charari (ID: 88)
+[2026-05-21T16:12:22.234Z] ✅ Turno #14 (09:00) -> Assigned to Daniel Felipe Duque  Angarita (ID: 91)
+[2026-05-21T16:12:22.234Z] ✅ Turno #15 (09:00) -> Assigned to Diego  Alejandro Sarmiento  Martinez (ID: 97)
+[2026-05-21T16:12:22.235Z] ✅ Turno #16 (09:10) -> Assigned to Diego  Alexander Niño Niño (ID: 98)
+[2026-05-21T16:12:22.235Z] ✅ Turno #17 (09:10) -> Assigned to Diego Andrés Rodríguez Villegas (ID: 100)
+[2026-05-21T16:12:22.236Z] ✅ Turno #18 (09:20) -> Assigned to Diego Fernando Torres Galindo (ID: 101)
+[2026-05-21T16:12:22.236Z] ✅ Turno #19 (09:30) -> Assigned to Dilan Alexander Rodriguez Jimenez (ID: 102)
+[2026-05-21T16:12:22.237Z] ✅ Turno #20 (09:30) -> Assigned to Edgardo Badillo Hernández (ID: 103)
+[2026-05-21T16:12:22.238Z] ✅ Turno #21 (10:00) -> Assigned to Emanuel Varón  Hernández (ID: 106)
+[2026-05-21T16:12:22.238Z] ✅ Turno #22 (10:10) -> Assigned to Henry Jhamith Valencia Sanchez (ID: 110)
+[2026-05-21T16:12:22.239Z] ✅ Turno #23 (12:40) -> Assigned to María García (ID: 3)
+[2026-05-21T16:12:22.244Z] 🏁 CRONOGRAMA FINALIZADO: {"count":20,"backups":0}
+[2026-05-21T16:16:46.284Z] 📅 [CRONOGRAMA] INICIO: Generando para fecha 2026-05-21
+[2026-05-21T16:16:46.286Z] 🔍 Servicios sin asignar: 3
+[2026-05-21T16:16:46.287Z] 📆 Fecha=2026-05-21 | JS Day=4 | DB Day=3
+[2026-05-21T16:16:46.289Z] 👥 Caddies con disponibilidad teórica: 121
+[2026-05-21T16:16:46.299Z] ✅ Turno #2 (10:28) -> Assigned to Juan Pérez (ID: 2)
+[2026-05-21T16:16:46.300Z] ✅ Turno #1 (10:45) -> Assigned to Andrés Camilo Vargas Garcia (ID: 70)
+[2026-05-21T16:16:46.301Z] ✅ Turno #3 (12:35) -> Assigned to María García (ID: 3)
+[2026-05-21T16:16:46.307Z] 🏁 CRONOGRAMA FINALIZADO: {"count":3,"backups":0}
+[2026-05-22T20:16:57.364Z] 📅 [CRONOGRAMA] INICIO: Generando para fecha 2026-05-22
+[2026-05-22T20:16:57.366Z] 🔍 Servicios sin asignar: 20
+[2026-05-22T20:16:57.366Z] 📆 Fecha=2026-05-22 | JS Day=5 | DB Day=4
+[2026-05-22T20:16:57.367Z] 👥 Caddies con disponibilidad teórica: 122
+[2026-05-22T20:16:57.369Z] ✅ Turno #4 (06:30) -> Assigned to Juan Pérez (ID: 2)
+[2026-05-22T20:16:57.370Z] ✅ Turno #5 (06:40) -> Assigned to Andrés Camilo Vargas Garcia (ID: 70)
+[2026-05-22T20:16:57.370Z] ✅ Turno #6 (07:00) -> Assigned to Andrés Lorenzo Urrea Bejarano (ID: 73)
+[2026-05-22T20:16:57.371Z] ✅ Turno #7 (07:00) -> Assigned to Brayan  Alejandro Lozano Téllez (ID: 76)
+[2026-05-22T20:16:57.371Z] ✅ Turno #8 (07:10) -> Assigned to Brayan Ricardo Pedraza Alfonso (ID: 78)
+[2026-05-22T20:16:57.372Z] ✅ Turno #9 (07:10) -> Assigned to Brayan Samuel Barragán Gasca (ID: 79)
+[2026-05-22T20:16:57.372Z] ✅ Turno #10 (07:20) -> Assigned to Bryam Steven Cárdenas Cárdenas (ID: 80)
+[2026-05-22T20:16:57.373Z] ✅ Turno #11 (08:00) -> Assigned to Carlos Julián Buitrago Salamanca (ID: 82)
+[2026-05-22T20:16:57.373Z] ✅ Turno #12 (08:40) -> Assigned to Cristian David Barrera Cepeda (ID: 84)
+[2026-05-22T20:16:57.374Z] ✅ Turno #13 (08:50) -> Assigned to Cristian Fabian Baleta  Acosta (ID: 86)
+[2026-05-22T20:16:57.374Z] ✅ Turno #14 (09:00) -> Assigned to Cristian Santiago Cáceres  Charari (ID: 88)
+[2026-05-22T20:16:57.375Z] ✅ Turno #15 (09:00) -> Assigned to Daniel Felipe Duque  Angarita (ID: 91)
+[2026-05-22T20:16:57.376Z] ✅ Turno #16 (09:10) -> Assigned to Diego  Alejandro Sarmiento  Martinez (ID: 97)
+[2026-05-22T20:16:57.376Z] ✅ Turno #17 (09:10) -> Assigned to Diego  Alexander Niño Niño (ID: 98)
+[2026-05-22T20:16:57.377Z] ✅ Turno #18 (09:20) -> Assigned to Diego Andrés Rodríguez Villegas (ID: 100)
+[2026-05-22T20:16:57.377Z] ✅ Turno #19 (09:30) -> Assigned to Diego Fernando Torres Galindo (ID: 101)
+[2026-05-22T20:16:57.378Z] ✅ Turno #20 (09:30) -> Assigned to Dilan Alexander Rodriguez Jimenez (ID: 102)
+[2026-05-22T20:16:57.378Z] ✅ Turno #21 (10:00) -> Assigned to Edgardo Badillo Hernández (ID: 103)
+[2026-05-22T20:16:57.379Z] ✅ Turno #22 (10:10) -> Assigned to Emanuel Varón  Hernández (ID: 106)
+[2026-05-22T20:16:57.380Z] ✅ Turno #23 (12:40) -> Assigned to María García (ID: 3)
+[2026-05-22T20:16:57.385Z] 🏁 CRONOGRAMA FINALIZADO: {"count":20,"backups":0}
+[2026-05-22T23:45:45.050Z] 📅 [CRONOGRAMA] INICIO: Generando para fecha 2026-05-22
+[2026-05-22T23:45:45.051Z] 🔍 Servicios sin asignar: 45
+[2026-05-22T23:45:45.052Z] 📆 Fecha=2026-05-22 | JS Day=5 | DB Day=4
+[2026-05-22T23:45:45.053Z] 👥 Caddies con disponibilidad teórica: 122
+[2026-05-22T23:45:45.055Z] ✅ Turno #1 (06:00:00) -> Assigned to Juan Pérez (ID: 2)
+[2026-05-22T23:45:45.055Z] ✅ Turno #2 (06:00:00) -> Assigned to Andrés Camilo Vargas Garcia (ID: 70)
+[2026-05-22T23:45:45.056Z] ✅ Turno #3 (06:00:00) -> Assigned to Andrés Lorenzo Urrea Bejarano (ID: 73)
+[2026-05-22T23:45:45.057Z] ✅ Turno #4 (06:00:00) -> Assigned to Brayan  Alejandro Lozano Téllez (ID: 76)
+[2026-05-22T23:45:45.057Z] ✅ Turno #5 (06:00:00) -> Assigned to Brayan Ricardo Pedraza Alfonso (ID: 78)
+[2026-05-22T23:45:45.058Z] ✅ Turno #6 (06:00:00) -> Assigned to Brayan Samuel Barragán Gasca (ID: 79)
+[2026-05-22T23:45:45.058Z] ✅ Turno #7 (06:00:00) -> Assigned to Bryam Steven Cárdenas Cárdenas (ID: 80)
+[2026-05-22T23:45:45.059Z] ✅ Turno #8 (06:00:00) -> Assigned to Carlos Julián Buitrago Salamanca (ID: 82)
+[2026-05-22T23:45:45.059Z] ✅ Turno #9 (07:00:00) -> Assigned to Cristian David Barrera Cepeda (ID: 84)
+[2026-05-22T23:45:45.060Z] ✅ Turno #10 (07:00:00) -> Assigned to Cristian Fabian Baleta  Acosta (ID: 86)
+[2026-05-22T23:45:45.060Z] ✅ Turno #11 (07:00:00) -> Assigned to Cristian Santiago Cáceres  Charari (ID: 88)
+[2026-05-22T23:45:45.061Z] ✅ Turno #12 (07:00:00) -> Assigned to Daniel Felipe Duque  Angarita (ID: 91)
+[2026-05-22T23:45:45.062Z] ✅ Turno #13 (07:00:00) -> Assigned to Diego  Alejandro Sarmiento  Martinez (ID: 97)
+[2026-05-22T23:45:45.062Z] ✅ Turno #14 (07:00:00) -> Assigned to Diego  Alexander Niño Niño (ID: 98)
+[2026-05-22T23:45:45.063Z] ✅ Turno #15 (08:00:00) -> Assigned to Diego Andrés Rodríguez Villegas (ID: 100)
+[2026-05-22T23:45:45.063Z] ✅ Turno #16 (08:00:00) -> Assigned to Diego Fernando Torres Galindo (ID: 101)
+[2026-05-22T23:45:45.064Z] ✅ Turno #17 (08:00:00) -> Assigned to Dilan Alexander Rodriguez Jimenez (ID: 102)
+[2026-05-22T23:45:45.065Z] ✅ Turno #18 (09:00:00) -> Assigned to Edgardo Badillo Hernández (ID: 103)
+[2026-05-22T23:45:45.065Z] ✅ Turno #19 (09:00:00) -> Assigned to Emanuel Varón  Hernández (ID: 106)
+[2026-05-22T23:45:45.066Z] ✅ Turno #20 (09:00:00) -> Assigned to Henry Jhamith Valencia Sanchez (ID: 110)
+[2026-05-22T23:45:45.066Z] ✅ Turno #21 (09:00:00) -> Assigned to Javier  Alexander Castillo Joaqui (ID: 111)
+[2026-05-22T23:45:45.067Z] ✅ Turno #22 (09:00:00) -> Assigned to Jeisson David Puentes Serrano (ID: 114)
+[2026-05-22T23:45:45.067Z] ✅ Turno #23 (09:00:00) -> Assigned to Jhojan Smith Sánchez . (ID: 115)
+[2026-05-22T23:45:45.068Z] ✅ Turno #24 (09:00:00) -> Assigned to Juan  David Rojas  Galindo (ID: 120)
+[2026-05-22T23:45:45.068Z] ✅ Turno #25 (10:00:00) -> Assigned to Juan  Felipe Galindo  Salazar (ID: 124)
+[2026-05-22T23:45:45.069Z] ✅ Turno #26 (10:00:00) -> Assigned to Juan  Pablo Fragozo Jiménez (ID: 126)
+[2026-05-22T23:45:45.069Z] ✅ Turno #27 (10:00:00) -> Assigned to Juan Andrés Urrego Arévalo (ID: 129)
+[2026-05-22T23:45:45.070Z] ✅ Turno #28 (10:00:00) -> Assigned to Juan David Ramos Urrea (ID: 130)
+[2026-05-22T23:45:45.071Z] ✅ Turno #29 (10:00:00) -> Assigned to Juan Diego Becerra Rincón (ID: 132)
+[2026-05-22T23:45:45.071Z] ✅ Turno #30 (10:00:00) -> Assigned to Juan Diego Benavides  Archila (ID: 133)
+[2026-05-22T23:45:45.072Z] ✅ Turno #31 (11:00:00) -> Assigned to Juan Felipe Redondo  Vega (ID: 136)
+[2026-05-22T23:45:45.072Z] ✅ Turno #32 (11:00:00) -> Assigned to Juan Sebastián Zambrano Vanegas (ID: 138)
+[2026-05-22T23:45:45.073Z] ✅ Turno #33 (11:00:00) -> Assigned to Juan Sebastián Bautista Rache (ID: 139)
+[2026-05-22T23:45:45.073Z] ✅ Turno #34 (12:00:00) -> Assigned to María García (ID: 3)
+[2026-05-22T23:45:45.074Z] ✅ Turno #35 (13:00:00) -> Assigned to Julián Alejandro Bohorquez  Castellanos (ID: 140)
+[2026-05-22T23:45:45.074Z] ✅ Turno #36 (14:00:00) -> Assigned to Julián Esteban López Beltrán (ID: 142)
+[2026-05-22T23:45:45.075Z] ✅ Turno #37 (14:00:00) -> Assigned to Julián Mateo Talero Arias (ID: 143)
+[2026-05-22T23:45:45.075Z] ✅ Turno #38 (14:00:00) -> Assigned to Julián Ramon Bolívar Naranjo (ID: 144)
+[2026-05-22T23:45:45.076Z] ✅ Turno #39 (15:00:00) -> Assigned to Kevin  Alexander Torres Urrego (ID: 145)
+[2026-05-22T23:45:45.077Z] ✅ Turno #40 (15:00:00) -> Assigned to Kevin  Alexander Poveda Contreras (ID: 146)
+[2026-05-22T23:45:45.077Z] ✅ Turno #41 (15:00:00) -> Assigned to Kevin Santiago Avila Rojas (ID: 148)
+[2026-05-22T23:45:45.078Z] ✅ Turno #42 (16:00:00) -> Assigned to Luis  Eduardo Corredor  Quintero (ID: 149)
+[2026-05-22T23:45:45.078Z] ✅ Turno #43 (17:00:00) -> Assigned to Manuel Alejandro Salamanca Cruz (ID: 151)
+[2026-05-22T23:45:45.079Z] ✅ Turno #44 (17:00:00) -> Assigned to Marco Antonio Rueda Caraballo (ID: 152)
+[2026-05-22T23:45:45.079Z] ✅ Turno #45 (18:00:00) -> Assigned to Michael Stiven Capera Yara (ID: 153)
+[2026-05-22T23:45:45.094Z] 🏁 CRONOGRAMA FINALIZADO: {"count":45,"backups":0}
+[2026-05-23T01:27:57.873Z] 📅 [CRONOGRAMA] INICIO: Generando para fecha 2026-05-23
+[2026-05-23T01:27:57.875Z] 🔍 Servicios sin asignar: 122
+[2026-05-23T01:27:57.876Z] 📆 Fecha=2026-05-23 | JS Day=6 | DB Day=5
+[2026-05-23T01:27:57.877Z] 👥 Caddies con disponibilidad teórica: 122
+[2026-05-23T01:27:57.886Z] ✅ Turno #1 (06:00:00) -> Assigned to María García (ID: 3)
+[2026-05-23T01:27:57.886Z] ✅ Turno #2 (06:00:00) -> Assigned to Alejandro Mejia  Arévalo (ID: 66)
+[2026-05-23T01:27:57.887Z] ✅ Turno #3 (06:00:00) -> Assigned to Álvaro  Alejandro Piñeros Ortega (ID: 68)
+[2026-05-23T01:27:57.888Z] ✅ Turno #4 (06:00:00) -> Assigned to Andrés  Mauricio Huertas Nova (ID: 69)
+[2026-05-23T01:27:57.888Z] ✅ Turno #5 (06:00:00) -> Assigned to Andrés Camilo Vargas Garcia (ID: 70)
+[2026-05-23T01:27:57.889Z] ✅ Turno #6 (07:00:00) -> Assigned to Andrés Felipe Carreño Ibáñez (ID: 71)
+[2026-05-23T01:27:57.889Z] ✅ Turno #7 (07:00:00) -> Assigned to Andrés Felipe Rincón Ruiz (ID: 72)
+[2026-05-23T01:27:57.890Z] ✅ Turno #8 (07:00:00) -> Assigned to Andrés Lorenzo Urrea Bejarano (ID: 73)
+[2026-05-23T01:27:57.891Z] ✅ Turno #9 (07:00:00) -> Assigned to Andrés Mauricio López Castro (ID: 74)
+[2026-05-23T01:27:57.892Z] ✅ Turno #10 (07:00:00) -> Assigned to Andrés Santiago Cortes Chávez (ID: 75)
+[2026-05-23T01:27:57.892Z] ✅ Turno #11 (07:00:00) -> Assigned to Brayan  Alejandro Lozano Téllez (ID: 76)
+[2026-05-23T01:27:57.893Z] ✅ Turno #12 (07:00:00) -> Assigned to Brayan Alejandro Medina  Ávila (ID: 77)
+[2026-05-23T01:27:57.894Z] ✅ Turno #13 (07:00:00) -> Assigned to Brayan Ricardo Pedraza Alfonso (ID: 78)
+[2026-05-23T01:27:57.894Z] ✅ Turno #14 (07:00:00) -> Assigned to Brayan Samuel Barragán Gasca (ID: 79)
+[2026-05-23T01:27:57.895Z] ✅ Turno #15 (07:00:00) -> Assigned to Bryam Steven Cárdenas Cárdenas (ID: 80)
+[2026-05-23T01:27:57.896Z] ✅ Turno #16 (07:00:00) -> Assigned to Carlos Julián Buitrago Salamanca (ID: 82)
+[2026-05-23T01:27:57.896Z] ✅ Turno #17 (07:00:00) -> Assigned to Carlos Sebastián Rodriguez Gonzalez (ID: 83)
+[2026-05-23T01:27:57.897Z] ✅ Turno #18 (07:00:00) -> Assigned to Cristian David Barrera Cepeda (ID: 84)
+[2026-05-23T01:27:57.898Z] ✅ Turno #19 (07:00:00) -> Assigned to Cristian David Gómez Gómez (ID: 85)
+[2026-05-23T01:27:57.899Z] ✅ Turno #20 (08:00:00) -> Assigned to Cristian Fabian Baleta  Acosta (ID: 86)
+[2026-05-23T01:27:57.899Z] ✅ Turno #21 (08:00:00) -> Assigned to Cristian Roberto Mayorga Martínez (ID: 87)
+[2026-05-23T01:27:57.900Z] ✅ Turno #22 (08:00:00) -> Assigned to Cristian Santiago Cáceres  Charari (ID: 88)
+[2026-05-23T01:27:57.901Z] ✅ Turno #23 (08:00:00) -> Assigned to Daniel Alejandro Vargas Yacuma (ID: 89)
+[2026-05-23T01:27:57.901Z] ✅ Turno #24 (08:00:00) -> Assigned to Daniel Felipe López Zarate (ID: 90)
+[2026-05-23T01:27:57.902Z] ✅ Turno #25 (08:00:00) -> Assigned to Daniel Felipe Duque  Angarita (ID: 91)
+[2026-05-23T01:27:57.902Z] ✅ Turno #26 (08:00:00) -> Assigned to Daniel Ricardo Higuera  Sichaca (ID: 92)
+[2026-05-23T01:27:57.903Z] ✅ Turno #27 (08:00:00) -> Assigned to Daniel Santiago Pinzón Pinto (ID: 93)
+[2026-05-23T01:27:57.904Z] ✅ Turno #28 (08:00:00) -> Assigned to David  Santiago Buenaver Puentes (ID: 94)
+[2026-05-23T01:27:57.904Z] ✅ Turno #29 (08:00:00) -> Assigned to David Alejandro Velásquez Alfonso (ID: 95)
+[2026-05-23T01:27:57.905Z] ✅ Turno #30 (08:00:00) -> Assigned to David Alejandro Castellanos Bohórquez (ID: 96)
+[2026-05-23T01:27:57.906Z] ✅ Turno #31 (08:00:00) -> Assigned to Diego  Alejandro Sarmiento  Martinez (ID: 97)
+[2026-05-23T01:27:57.906Z] ✅ Turno #32 (08:00:00) -> Assigned to Diego  Alexander Niño Niño (ID: 98)
+[2026-05-23T01:27:57.907Z] ✅ Turno #33 (08:00:00) -> Assigned to Diego Alejandro Bohórquez Vargas (ID: 99)
+[2026-05-23T01:27:57.908Z] ✅ Turno #34 (08:00:00) -> Assigned to Diego Andrés Rodríguez Villegas (ID: 100)
+[2026-05-23T01:27:57.909Z] ✅ Turno #35 (08:00:00) -> Assigned to Diego Fernando Torres Galindo (ID: 101)
+[2026-05-23T01:27:57.909Z] ✅ Turno #36 (08:00:00) -> Assigned to Dilan Alexander Rodriguez Jimenez (ID: 102)
+[2026-05-23T01:27:57.910Z] ✅ Turno #37 (08:00:00) -> Assigned to Edgardo Badillo Hernández (ID: 103)
+[2026-05-23T01:27:57.911Z] ✅ Turno #38 (08:00:00) -> Assigned to Edward Camilo Arévalo Sosa (ID: 104)
+[2026-05-23T01:27:57.911Z] ✅ Turno #39 (09:00:00) -> Assigned to Edward Steven Cardozo Cárdenas (ID: 105)
+[2026-05-23T01:27:57.912Z] ✅ Turno #40 (09:00:00) -> Assigned to Emanuel Varón  Hernández (ID: 106)
+[2026-05-23T01:27:57.913Z] ✅ Turno #41 (09:00:00) -> Assigned to Emilio Gomez Gomez (ID: 107)
+[2026-05-23T01:27:57.914Z] ✅ Turno #42 (09:00:00) -> Assigned to Erick  Santiago Montañez Guerra (ID: 108)
+[2026-05-23T01:27:57.915Z] ✅ Turno #43 (09:00:00) -> Assigned to Gabriel  Santiago Quiroga Rincón (ID: 109)
+[2026-05-23T01:27:57.915Z] ✅ Turno #44 (09:00:00) -> Assigned to Henry Jhamith Valencia Sanchez (ID: 110)
+[2026-05-23T01:27:57.916Z] ✅ Turno #45 (09:00:00) -> Assigned to Javier  Alexander Castillo Joaqui (ID: 111)
+[2026-05-23T01:27:57.917Z] ✅ Turno #46 (09:00:00) -> Assigned to Javier  Andrés Martinez  Muñoz (ID: 112)
+[2026-05-23T01:27:57.917Z] ✅ Turno #47 (09:00:00) -> Assigned to Jean Carlo Ospina Garnica (ID: 113)
+[2026-05-23T01:27:57.918Z] ✅ Turno #48 (09:00:00) -> Assigned to Jeisson David Puentes Serrano (ID: 114)
+[2026-05-23T01:27:57.918Z] ✅ Turno #49 (09:00:00) -> Assigned to Jhojan Smith Sánchez . (ID: 115)
+[2026-05-23T01:27:57.919Z] ✅ Turno #50 (09:00:00) -> Assigned to Johan Steven Echeverría  Agudelo (ID: 116)
+[2026-05-23T01:27:57.919Z] ✅ Turno #51 (09:00:00) -> Assigned to John Michael Medina Bolañoz (ID: 117)
+[2026-05-23T01:27:57.920Z] ✅ Turno #52 (09:00:00) -> Assigned to Joseph David Palacios Valdés (ID: 118)
+[2026-05-23T01:27:57.921Z] ✅ Turno #53 (09:00:00) -> Assigned to Juan  Andrés Camacho  Narváez (ID: 119)
+[2026-05-23T01:27:57.922Z] ✅ Turno #54 (09:00:00) -> Assigned to Juan  David Rojas  Galindo (ID: 120)
+[2026-05-23T01:27:57.922Z] ✅ Turno #55 (09:00:00) -> Assigned to Juan  David Diaz  Valbuena (ID: 121)
+[2026-05-23T01:27:57.923Z] ✅ Turno #56 (09:00:00) -> Assigned to Juan  Diego Rodríguez Rosero (ID: 122)
+[2026-05-23T01:27:57.923Z] ✅ Turno #57 (09:00:00) -> Assigned to Juan  Diego Nova  Cardona (ID: 123)
+[2026-05-23T01:27:57.924Z] ✅ Turno #58 (10:00:00) -> Assigned to Juan  Felipe Galindo  Salazar (ID: 124)
+[2026-05-23T01:27:57.925Z] ✅ Turno #59 (10:00:00) -> Assigned to Juan  Felipe Diaz Camelo (ID: 125)
+[2026-05-23T01:27:57.925Z] ✅ Turno #60 (10:00:00) -> Assigned to Juan  Pablo Fragozo Jiménez (ID: 126)
+[2026-05-23T01:27:57.926Z] ✅ Turno #61 (10:00:00) -> Assigned to Juan  Sebastián Lemus Pira (ID: 127)
+[2026-05-23T01:27:57.926Z] ✅ Turno #62 (10:00:00) -> Assigned to Juan  Sebastián Romero Beltrán (ID: 128)
+[2026-05-23T01:27:57.927Z] ✅ Turno #63 (10:00:00) -> Assigned to Juan Andrés Urrego Arévalo (ID: 129)
+[2026-05-23T01:27:57.927Z] ✅ Turno #64 (10:00:00) -> Assigned to Juan David Ramos Urrea (ID: 130)
+[2026-05-23T01:27:57.928Z] ✅ Turno #65 (10:00:00) -> Assigned to Juan Diego Moncada Ramirez (ID: 131)
+[2026-05-23T01:27:57.928Z] ✅ Turno #66 (10:00:00) -> Assigned to Juan Diego Becerra Rincón (ID: 132)
+[2026-05-23T01:27:57.929Z] ✅ Turno #67 (10:00:00) -> Assigned to Juan Diego Benavides  Archila (ID: 133)
+[2026-05-23T01:27:57.930Z] ✅ Turno #68 (10:00:00) -> Assigned to Juan Esteban Jaramillo Devia (ID: 134)
+[2026-05-23T01:27:57.930Z] ✅ Turno #69 (10:00:00) -> Assigned to Juan Felipe Pérez Baquero (ID: 135)
+[2026-05-23T01:27:57.931Z] ✅ Turno #70 (10:00:00) -> Assigned to Juan Felipe Redondo  Vega (ID: 136)
+[2026-05-23T01:27:57.931Z] ✅ Turno #71 (10:00:00) -> Assigned to Juan Pablo Silva Lopez (ID: 137)
+[2026-05-23T01:27:57.932Z] ✅ Turno #72 (10:00:00) -> Assigned to Juan Sebastián Zambrano Vanegas (ID: 138)
+[2026-05-23T01:27:57.933Z] ✅ Turno #73 (10:00:00) -> Assigned to Juan Sebastián Bautista Rache (ID: 139)
+[2026-05-23T01:27:57.933Z] ✅ Turno #74 (10:00:00) -> Assigned to Julián Alejandro Bohorquez  Castellanos (ID: 140)
+[2026-05-23T01:27:57.934Z] ✅ Turno #75 (10:00:00) -> Assigned to Julián Camilo Castillo Moreno (ID: 141)
+[2026-05-23T01:27:57.934Z] ✅ Turno #76 (10:00:00) -> Assigned to Julián Esteban López Beltrán (ID: 142)
+[2026-05-23T01:27:57.936Z] ✅ Turno #77 (11:00:00) -> Assigned to Julián Mateo Talero Arias (ID: 143)
+[2026-05-23T01:27:57.936Z] ✅ Turno #78 (11:00:00) -> Assigned to Julián Ramon Bolívar Naranjo (ID: 144)
+[2026-05-23T01:27:57.937Z] ✅ Turno #79 (11:00:00) -> Assigned to Kevin  Alexander Torres Urrego (ID: 145)
+[2026-05-23T01:27:57.937Z] ✅ Turno #80 (11:00:00) -> Assigned to Kevin  Alexander Poveda Contreras (ID: 146)
+[2026-05-23T01:27:57.938Z] ✅ Turno #81 (11:00:00) -> Assigned to Kevin  Stiven Bautista  Sedano (ID: 147)
+[2026-05-23T01:27:57.938Z] ✅ Turno #82 (11:00:00) -> Assigned to Kevin Santiago Avila Rojas (ID: 148)
+[2026-05-23T01:27:57.939Z] ✅ Turno #83 (11:00:00) -> Assigned to Luis  Eduardo Corredor  Quintero (ID: 149)
+[2026-05-23T01:27:57.939Z] ✅ Turno #84 (11:00:00) -> Assigned to Maicol  Stiven Moreno  Rojas (ID: 150)
+[2026-05-23T01:27:57.940Z] ✅ Turno #85 (11:00:00) -> Assigned to Manuel Alejandro Salamanca Cruz (ID: 151)
+[2026-05-23T01:27:57.940Z] ✅ Turno #86 (11:00:00) -> Assigned to Marco Antonio Rueda Caraballo (ID: 152)
+[2026-05-23T01:27:57.941Z] ✅ Turno #87 (11:00:00) -> Assigned to Michael Stiven Capera Yara (ID: 153)
+[2026-05-23T01:27:57.941Z] ✅ Turno #88 (11:00:00) -> Assigned to Miguel Ángel Varón Olaya (ID: 154)
+[2026-05-23T01:27:57.942Z] ✅ Turno #89 (11:00:00) -> Assigned to Miguel Ángel Ruco Herrera (ID: 155)
+[2026-05-23T01:27:57.942Z] ✅ Turno #90 (11:00:00) -> Assigned to Milton Alejandro Guzmán Buitrago (ID: 156)
+[2026-05-23T01:27:57.943Z] ✅ Turno #91 (11:00:00) -> Assigned to Nicolas  Fernando Suarez  Antonio (ID: 157)
+[2026-05-23T01:27:57.943Z] ✅ Turno #92 (11:00:00) -> Assigned to Nicolas Medina Marín (ID: 158)
+[2026-05-23T01:27:57.944Z] ✅ Turno #93 (11:00:00) -> Assigned to Nicolas Cubillos Pinilla (ID: 159)
+[2026-05-23T01:27:57.945Z] ✅ Turno #94 (11:00:00) -> Assigned to Nicolas Danilo Gonzalez Peñaranda (ID: 160)
+[2026-05-23T01:27:57.945Z] ✅ Turno #95 (11:00:00) -> Assigned to Nicolás Daniel Saavedra Corredor (ID: 161)
+[2026-05-23T01:27:57.946Z] ✅ Turno #96 (12:00:00) -> Assigned to Nilson Javier Tuiran Galeano (ID: 162)
+[2026-05-23T01:27:57.947Z] ✅ Turno #97 (12:00:00) -> Assigned to Oscar  Julián Cuervo  Herrera (ID: 163)
+[2026-05-23T01:27:57.947Z] ✅ Turno #98 (12:00:00) -> Assigned to Oscar  Julián Figueroa  Herrera (ID: 164)
+[2026-05-23T01:27:57.948Z] ✅ Turno #99 (12:00:00) -> Assigned to Robert Andrés Sánchez  Arias (ID: 165)
+[2026-05-23T01:27:57.948Z] ✅ Turno #100 (12:00:00) -> Assigned to Samuel Rodriguez Méndez (ID: 166)
+[2026-05-23T01:27:57.949Z] ✅ Turno #101 (12:00:00) -> Assigned to Samuel Esteban Quiroga Pérez (ID: 167)
+[2026-05-23T01:27:57.949Z] ✅ Turno #102 (12:00:00) -> Assigned to Santiago Delgado  Penagos (ID: 168)
+[2026-05-23T01:27:57.950Z] ✅ Turno #103 (12:00:00) -> Assigned to Santiago Bernal Urrea (ID: 169)
+[2026-05-23T01:27:57.950Z] ✅ Turno #104 (12:00:00) -> Assigned to Santiago . Escobar Ariza (ID: 170)
+[2026-05-23T01:27:57.951Z] ✅ Turno #105 (12:00:00) -> Assigned to Santiago Nicolas Herrera Herrera (ID: 171)
+[2026-05-23T01:27:57.951Z] ✅ Turno #106 (12:00:00) -> Assigned to Sebastián . Martinez Troncoso (ID: 172)
+[2026-05-23T01:27:57.952Z] ✅ Turno #107 (12:00:00) -> Assigned to Sebastián Ortiz Rodríguez (ID: 173)
+[2026-05-23T01:27:57.952Z] ✅ Turno #108 (12:00:00) -> Assigned to Sebastián Orjuela  López (ID: 174)
+[2026-05-23T01:27:57.953Z] ✅ Turno #109 (12:00:00) -> Assigned to Sergio  Alejandro Castellanos Ángel (ID: 175)
+[2026-05-23T01:27:57.954Z] ✅ Turno #110 (12:00:00) -> Assigned to Sergio  Antonio Torres Galindo (ID: 176)
+[2026-05-23T01:27:57.954Z] ✅ Turno #111 (12:00:00) -> Assigned to Sergio Villa Angulo (ID: 177)
+[2026-05-23T01:27:57.955Z] ✅ Turno #112 (12:00:00) -> Assigned to Sergio . Martinez Giraldo (ID: 178)
+[2026-05-23T01:27:57.956Z] ✅ Turno #113 (13:00:00) -> Assigned to Sergio Alejandro García Gaviria (ID: 179)
+[2026-05-23T01:27:57.956Z] ✅ Turno #114 (13:00:00) -> Assigned to Thipheret Rojas Castillo (ID: 180)
+[2026-05-23T01:27:57.957Z] ✅ Turno #115 (13:00:00) -> Assigned to Tomas Eduardo Páez Sánchez (ID: 181)
+[2026-05-23T01:27:57.957Z] ✅ Turno #116 (14:00:00) -> Assigned to Wilson Fabian Rodriguez Caicedo (ID: 182)
+[2026-05-23T01:27:57.958Z] ✅ Turno #117 (14:00:00) -> Assigned to Yamid  Felipe López Cadena (ID: 183)
+[2026-05-23T01:27:57.959Z] ✅ Turno #118 (14:00:00) -> Assigned to Yefferson Andrés Ruiz Arias (ID: 184)
+[2026-05-23T01:27:57.960Z] ✅ Turno #119 (14:00:00) -> Assigned to Carlos Caddie (ID: 186)
+[2026-05-23T01:27:57.960Z] ✅ Turno #120 (14:00:00) -> Assigned to Cristian Romero (ID: 187)
+[2026-05-23T01:27:57.961Z] ✅ Turno #121 (14:00:00) -> Assigned to Carlos Test (ID: 65)
+[2026-05-23T01:27:57.962Z] ⚠️ No caddie found for Turno #122 (15:00:00) [Morning=false]
+[2026-05-23T01:27:57.968Z] 🏁 CRONOGRAMA FINALIZADO: {"count":121,"backups":0}
