@@ -330,7 +330,7 @@ app.get('/api/servicios', async (req, res) => {
             params.push(caddie_id);
         }
         if (mes && anio) {
-            query += " AND strftime('%Y', s.fecha_servicio) = ? AND strftime('%m', s.fecha_servicio) = ?";
+            query += " AND YEAR(s.fecha_servicio) = ? AND MONTH(s.fecha_servicio) = ?";
             params.push(anio.toString(), mes.toString().padStart(2, '0'));
         }
         if (req.query.estado) {
@@ -1109,7 +1109,7 @@ app.get('/api/stats', async (req, res) => {
         const distribucionRaw = await db.prepare(`
             SELECT deporte, COUNT(*) as cantidad 
             FROM servicios 
-            WHERE strftime('%Y-%m', fecha_servicio) = strftime('%Y-%m', 'now', 'localtime')
+            WHERE DATE_FORMAT(fecha_servicio, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m')
             GROUP BY deporte
         `).all();
         
@@ -1138,8 +1138,8 @@ app.get('/api/stats', async (req, res) => {
               AND s.estado = 'Pendiente'
               AND s.reporto_llegada = 0
               AND s.caddie_id IS NOT NULL
-              AND (strftime('%H', 'now', 'localtime') * 60 + strftime('%M', 'now', 'localtime')) > 
-                  (strftime('%H', s.hora_inicio_programada) * 60 + strftime('%M', s.hora_inicio_programada) - 20)
+              AND (HOUR(CURTIME()) * 60 + MINUTE(CURTIME())) > 
+                  (HOUR(s.hora_inicio_programada) * 60 + MINUTE(s.hora_inicio_programada) - 20)
         `).all();
 
         // ALERTA PROACTIVA: Turnos cancelados por novedad hoy
