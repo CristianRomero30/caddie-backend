@@ -638,7 +638,7 @@ app.get('/api/caddies/en-club', async (req, res) => {
             AND u.id NOT IN (
                 SELECT caddie_id FROM servicios 
                 WHERE (estado = 'Pendiente' OR estado = 'En Juego') 
-                AND fecha_servicio = date('now', 'localtime')
+                AND fecha_servicio = CURDATE()
                 AND caddie_id IS NOT NULL
             )
             ORDER BY p.horas_acumuladas ASC
@@ -1025,7 +1025,7 @@ app.get('/api/stats', async (req, res) => {
                 FROM servicios s
                 JOIN usuarios u ON s.socio_id = u.id
                 WHERE s.caddie_id = ? AND s.estado IN ('Pendiente', 'En Juego')
-                AND s.fecha_servicio >= date('now', 'localtime')
+                AND s.fecha_servicio >= CURDATE()
                 ORDER BY s.fecha_servicio ASC, s.hora_inicio_programada ASC
                 LIMIT 1
             `).get(caddie_id);
@@ -1034,7 +1034,7 @@ app.get('/api/stats', async (req, res) => {
             const tendenciaRaw = await db.prepare(`
                 SELECT fecha_servicio as fecha, COUNT(*) as cantidad 
                 FROM servicios 
-                WHERE caddie_id = ? AND estado = 'Completado' AND fecha_servicio >= date('now', '-6 days', 'localtime')
+                WHERE caddie_id = ? AND estado = 'Completado' AND fecha_servicio >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
                 GROUP BY fecha_servicio
             `).all(caddie_id);
 
@@ -1071,15 +1071,15 @@ app.get('/api/stats', async (req, res) => {
         const param = (deporte && deporte !== 'Ambos') ? [deporte] : [];
 
         // 1. Basic Stats (Admin/Coordinador)
-        const serviciosHoy = await db.prepare(`SELECT COUNT(*) as count FROM servicios WHERE fecha_servicio = date('now', 'localtime')${filter}`).get(...param).count;
+        const serviciosHoy = await db.prepare(`SELECT COUNT(*) as count FROM servicios WHERE fecha_servicio = CURDATE()${filter}`).get(...param).count;
         const caddiesActivos = await db.prepare(`SELECT COUNT(*) as count FROM usuarios WHERE rol_id = 4 AND estado = 'Activo'${filter}`).get(...param).count;
-        const incidenciasHoy = await db.prepare(`SELECT COUNT(*) as count FROM incidencias WHERE date(fecha_reporte) = date('now', 'localtime')`).get().count;
+        const incidenciasHoy = await db.prepare(`SELECT COUNT(*) as count FROM incidencias WHERE date(fecha_reporte) = CURDATE()`).get().count;
 
         // 2. Trend (Last 7 Days)
         const tendenciaRaw = await db.prepare(`
             SELECT fecha_servicio as fecha, COUNT(*) as cantidad 
             FROM servicios 
-            WHERE fecha_servicio >= date('now', '-6 days', 'localtime')
+            WHERE fecha_servicio >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
             ${filter}
             GROUP BY fecha_servicio
             ORDER BY fecha_servicio ASC
@@ -1133,7 +1133,7 @@ app.get('/api/stats', async (req, res) => {
             FROM servicios s
             JOIN usuarios u1 ON s.socio_id = u1.id
             JOIN usuarios u2 ON s.caddie_id = u2.id
-            WHERE s.fecha_servicio = date('now', 'localtime')
+            WHERE s.fecha_servicio = CURDATE()
               AND s.estado = 'Pendiente'
               AND s.reporto_llegada = 0
               AND s.caddie_id IS NOT NULL
@@ -1147,7 +1147,7 @@ app.get('/api/stats', async (req, res) => {
             FROM servicios s
             JOIN usuarios u1 ON s.socio_id = u1.id
             LEFT JOIN usuarios u2 ON s.caddie_id = u2.id
-            WHERE s.fecha_servicio = date('now', 'localtime')
+            WHERE s.fecha_servicio = CURDATE()
               AND s.estado_confirmacion = 'Reasignado por novedad'
         `).all();
 
