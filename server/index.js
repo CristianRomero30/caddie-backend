@@ -1470,7 +1470,7 @@ setInterval(ejecutarMantenimiento, 1000 * 60 * 60);
 
 // --- CATCH ALL para el frontend ---
 // Ahora el frontend está en Hostinger, así que el backend solo responde APIs
-app.use('*', (req, res, next) => {
+app.use((req, res, next) => {
     if (req.path.startsWith('/api')) {
         return next();
     }
