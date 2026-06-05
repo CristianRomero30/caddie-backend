@@ -1468,12 +1468,13 @@ const ejecutarMantenimiento = async () => {
 ejecutarMantenimiento();
 setInterval(ejecutarMantenimiento, 1000 * 60 * 60);
 
-// SPA Fallback: Servir el frontend para cualquier ruta que no sea de la API
-app.use((req, res, next) => {
+// --- CATCH ALL para el frontend ---
+// Ahora el frontend está en Hostinger, así que el backend solo responde APIs
+app.use('*', (req, res, next) => {
     if (req.path.startsWith('/api')) {
         return next();
     }
-    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+    res.send('API Backend Caddies Online 🟢');
 });
 
 app.listen(PORT, () => {
