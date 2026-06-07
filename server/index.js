@@ -314,8 +314,10 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
                 AND u.id NOT IN (
                     SELECT caddie_id FROM servicios 
                     WHERE fecha_servicio = ? AND estado IN ('Pendiente', 'En Juego') AND caddie_id IS NOT NULL
+                    UNION
+                    SELECT caddie_id FROM asignaciones_canchas WHERE fecha = ?
                 )
-            `).all(diaProcesado, fecha);
+            `).all(diaProcesado, fecha, fecha);
 
             // Ordenar equitativamente
             caddiesDisponibles.sort((a, b) => {
@@ -326,9 +328,10 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
             });
 
             // 3. Asignar Caddies a Canchas
-            const insertStmt = db.prepare(`
-                INSERT INTO servicios (socio_id, caddie_id, fecha_servicio, hora_inicio_programada, estado, deporte, observaciones, external_id) 
-                VALUES (?, ?, ?, '07:00', 'Pendiente', 'Tenis', 'Asignación automática de fin de semana', ?)
+            const insertStmt = await db.prepare(`
+                INSERT INTO asignaciones_canchas (fecha, cancha_id, caddie_id) 
+                VALUES (?, ?, ?)
+                ON DUPLICATE KEY UPDATE caddie_id = VALUES(caddie_id)
             `);
 
             let asignados = 0;
@@ -340,11 +343,8 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
             for (let i = 0; i < maxAsignaciones; i++) {
                 const cancha = canchas[i];
                 const caddie = caddiesDisponibles[i];
-                
-                // Usamos un external_id ficticio o temporal, aquí usamos timestamp
-                const fakeExternalId = Date.now() + i; 
 
-                await insertStmt.run(cancha.id, caddie.id, fecha, fakeExternalId);
+                await insertStmt.run(fecha, cancha.id, caddie.id);
                 asignados++;
                 asignaciones.push({ 
                     id: caddie.id, 
@@ -404,11 +404,13 @@ app.get('/api/servicios', async (req, res) => {
                 s.*, 
                 u1.nombre as jugador_nombre, 
                 u2.nombre as caddie_nombre,
-                p2.esta_en_club as caddie_en_club
+                p2.esta_en_club as caddie_en_club,
+                u3.nombre as cancha_nombre
             FROM servicios s
             JOIN usuarios u1 ON s.socio_id = u1.id
             LEFT JOIN usuarios u2 ON s.caddie_id = u2.id
             LEFT JOIN perfiles_caddie p2 ON u2.id = p2.usuario_id
+            LEFT JOIN usuarios u3 ON s.cancha_id = u3.id
             WHERE 1=1
         `;
         
@@ -444,6 +446,37 @@ app.get('/api/servicios', async (req, res) => {
         res.json(servicios);
     } catch (error) {
         res.status(500).json({ success: false, message: 'Error recuperando servicios' });
+    }
+});
+
+// Listar canchas disponibles para asignación
+app.get('/api/canchas/disponibles', async (req, res) => {
+    const { fecha, hora } = req.query; // fecha: YYYY-MM-DD
+    if (!fecha) return res.status(400).json({ error: 'Falta fecha' });
+
+    try {
+        // Obtenemos canchas que tienen caddie asignado hoy
+        // Y que no están "En Juego" ni tienen turno "Pendiente" en esa misma hora exacta
+        const query = `
+            SELECT c.id as cancha_id, c.nombre as cancha_nombre, 
+                   cad.id as caddie_id, cad.nombre as caddie_nombre
+            FROM asignaciones_canchas ac
+            JOIN usuarios c ON ac.cancha_id = c.id
+            JOIN usuarios cad ON ac.caddie_id = cad.id
+            WHERE ac.fecha = ?
+            AND c.id NOT IN (
+                SELECT cancha_id FROM servicios
+                WHERE fecha_servicio = ?
+                AND cancha_id IS NOT NULL
+                AND (estado = 'En Juego' OR (estado = 'Pendiente' AND hora_inicio_programada = ?))
+            )
+            ORDER BY CAST(SUBSTR(c.nombre, 8) AS INTEGER)
+        `;
+        const canchas = await db.prepare(query).all(fecha, fecha, hora);
+        res.json(canchas);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error recuperando canchas' });
     }
 });
 
@@ -561,13 +594,30 @@ app.patch('/api/servicios/:id/hora', async (req, res) => {
 // Reasignar Caddie a un turno existente
 app.patch('/api/servicios/:id/asignar', async (req, res) => {
     const { id } = req.params;
-    const { caddie_id } = req.body;
+    const { caddie_id, cancha_id } = req.body;
     try {
-        await db.prepare("UPDATE servicios SET caddie_id = ?, estado_confirmacion = 'Pendiente', reporto_llegada = 0, es_puntual = NULL, ubicacion_verificada = 0 WHERE id = ?")
-          .run(caddie_id, id);
+        if (cancha_id) {
+            // Asignación de Cancha (Tenis Finde)
+            // Buscar la fecha del servicio
+            const [servicio] = await db.prepare('SELECT fecha_servicio FROM servicios WHERE id = ?').all(id);
+            if (!servicio) throw new Error('Servicio no encontrado');
+            
+            // Buscar caddie asignado a esta cancha en esta fecha
+            const [asignacion] = await db.prepare('SELECT caddie_id FROM asignaciones_canchas WHERE fecha = ? AND cancha_id = ?').all(servicio.fecha_servicio, cancha_id);
+            if (!asignacion) throw new Error('La cancha seleccionada no tiene un caddie asignado para este día.');
+            
+            await db.prepare("UPDATE servicios SET caddie_id = ?, cancha_id = ?, estado_confirmacion = 'Pendiente', reporto_llegada = 0, es_puntual = NULL, ubicacion_verificada = 0 WHERE id = ?")
+                .run(asignacion.caddie_id, cancha_id, id);
+        } else if (caddie_id) {
+            // Asignación normal de Caddie
+            await db.prepare("UPDATE servicios SET caddie_id = ?, cancha_id = NULL, estado_confirmacion = 'Pendiente', reporto_llegada = 0, es_puntual = NULL, ubicacion_verificada = 0 WHERE id = ?")
+              .run(caddie_id, id);
+        } else {
+            throw new Error('Debe proporcionar un caddie o una cancha.');
+        }
         res.json({ success: true });
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Error reasignando caddie' });
+        res.status(500).json({ success: false, message: error.message || 'Error reasignando caddie' });
     }
 });
  
