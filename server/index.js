@@ -1512,7 +1512,11 @@ app.post('/api/importar-horario', upload.single('file'), (req, res) => {
         
         res.json({ 
             success: true, 
-            message: `Importación exitosa: ${importedCount} turnos cargados.`,
+            message: importedCount === 0 && errors.length > 0 
+                ? `0 turnos. Error interno: ${errors[0]}` 
+                : importedCount === 0 
+                    ? `0 turnos cargados. Todos los turnos en este archivo ya existían o el archivo no tiene turnos nuevos.`
+                    : `Importación exitosa: ${importedCount} turnos cargados.`,
             count: importedCount,
             errors: errors.slice(0, 5)
         });
