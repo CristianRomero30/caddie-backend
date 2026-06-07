@@ -1339,7 +1339,7 @@ app.post('/api/caddies', async (req, res) => {
 // Middleware catch-all para React (Production)
 // --- IMPORTACIÓN DE HORARIOS (99apps) ---
 // --- IMPORTACIÓN DE HORARIOS (99apps) ---
-app.post('/api/importar-horario', upload.single('file'), (req, res) => {
+app.post('/api/importar-horario', upload.single('file'), async (req, res) => {
     const logPath = path.join(__dirname, 'logs/import.log');
     const log = (msg) => {
         const time = new Date().toISOString();
@@ -1410,7 +1410,7 @@ app.post('/api/importar-horario', upload.single('file'), (req, res) => {
         const dataRows = rows.slice(3);
 
         const insertStmt = db.prepare(`
-            INSERT OR IGNORE INTO servicios 
+            INSERT IGNORE INTO servicios 
             (socio_id, fecha_servicio, hora_inicio_programada, deporte, estado, external_id, observaciones, tiene_boliador, nombre_boliador)
             VALUES (?, ?, ?, ?, 'Pendiente', ?, ?, ?, ?)
         `);
@@ -1420,9 +1420,10 @@ app.post('/api/importar-horario', upload.single('file'), (req, res) => {
         const userByEmailStmt = db.prepare('SELECT id FROM usuarios WHERE email = ?');
 
         log('⚙️ Iniciando transacción de base de datos...');
-        const performImport = db.transaction((rowsToProcess) => {
-            rowsToProcess.forEach((row, index) => {
-                if (!row || row.length < 5) return;
+        const performImport = db.transaction(async (rowsToProcess) => {
+            let index = 0;
+            for (const row of rowsToProcess) {
+                if (!row || row.length < 5) { index++; continue; }
 
                 try {
                     const idReserva = row[colMap.id];
@@ -1434,23 +1435,23 @@ app.post('/api/importar-horario', upload.single('file'), (req, res) => {
 
                     // 1. Obtener o Crear Jugador
                     let jugadorId;
-                    const existingUser = userCheckStmt.get(nombreJugador);
+                    const existingUser = await userCheckStmt.get(nombreJugador);
                     
                     if (!existingUser) {
                         const emailBase = nombreJugador.toLowerCase().replace(/\s+/g, '.');
                         const emailDummy = `${emailBase}@club.com`;
                         
                         try {
-                            const resInsert = userInsertStmt.run(nombreJugador, emailDummy, 'jugador123', deporte, 'Activo');
+                            const resInsert = await userInsertStmt.run(nombreJugador, emailDummy, 'jugador123', deporte, 'Activo');
                             jugadorId = resInsert.lastInsertRowid;
                         } catch (err) {
-                            if (err.message.includes('UNIQUE constraint failed')) {
-                                const userByEmail = userByEmailStmt.get(emailDummy);
+                            if (err.message.includes('UNIQUE constraint failed') || err.message.includes('Duplicate entry')) {
+                                const userByEmail = await userByEmailStmt.get(emailDummy);
                                 if (userByEmail) {
                                     jugadorId = userByEmail.id;
                                 } else {
                                     const emailAlt = `${emailBase}.${Date.now().toString().slice(-4)}@club.com`;
-                                    const resInsertAlt = userInsertStmt.run(nombreJugador, emailAlt, 'jugador123', deporte, 'Activo');
+                                    const resInsertAlt = await userInsertStmt.run(nombreJugador, emailAlt, 'jugador123', deporte, 'Activo');
                                     jugadorId = resInsertAlt.lastInsertRowid;
                                 }
                             } else {
@@ -1493,7 +1494,7 @@ app.post('/api/importar-horario', upload.single('file'), (req, res) => {
                     }
 
                     const obs = `Importado de 99apps (ID: ${idReserva})`;
-                    const info = insertStmt.run(jugadorId, fechaStr, horaStr, deporte, idReserva, obs, tiene_boliador, nombre_boliador);
+                    const info = await insertStmt.run(jugadorId, fechaStr, horaStr, deporte, idReserva, obs, tiene_boliador, nombre_boliador);
                     if (info.changes > 0) {
                         importedCount++;
                         if (importedCount % 10 === 0) log(`🔹 Procesadas ${importedCount} filas...`);
@@ -1503,10 +1504,11 @@ app.post('/api/importar-horario', upload.single('file'), (req, res) => {
                     log(`⚠️ Error en fila ${index + 4}: ${e.message}`);
                     errors.push(`Fila ${index + 4}: ${e.message}`);
                 }
-            });
+                index++;
+            }
         });
 
-        performImport(dataRows);
+        await performImport(dataRows);
         
         log(`✅ [IMPORT] Finalizado exitosamente. ${importedCount} servicios nuevos.`);
         
