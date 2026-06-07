@@ -123,6 +123,8 @@ async function initDB() {
     try { await db.prepare('ALTER TABLE incidencias ADD COLUMN hora_inicio TIME').run(); } catch (e) {}
     try { await db.prepare('ALTER TABLE incidencias ADD COLUMN hora_fin TIME').run(); } catch (e) {}
     try { await db.prepare('ALTER TABLE incidencias ADD COLUMN todo_el_dia INTEGER DEFAULT 0').run(); } catch (e) {}
+    try { await db.prepare('ALTER TABLE servicios ADD COLUMN tiene_boliador INTEGER DEFAULT 0').run(); } catch (e) {}
+    try { await db.prepare('ALTER TABLE servicios ADD COLUMN nombre_boliador TEXT').run(); } catch (e) {}
 }
 initDB();
 
