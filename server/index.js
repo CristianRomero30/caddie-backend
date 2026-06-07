@@ -270,6 +270,94 @@ app.put('/api/caddies/:id/horario', async (req, res) => {
     }
 });
 
+// Generar Cronograma de Tenis Fin de Semana
+app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
+    const { fecha } = req.body;
+    if (!fecha) return res.status(400).json({ success: false, message: 'La fecha es obligatoria' });
+
+    try {
+        const transaction = db.transaction(() => {
+            // 1. Obtener las 19 canchas (usuarios virtuales)
+            const canchas = db.prepare(`
+                SELECT id, nombre FROM usuarios 
+                WHERE nombre LIKE 'Cancha %' AND rol_id = 3 
+                ORDER BY CAST(SUBSTR(nombre, 8) AS INTEGER) 
+                LIMIT 19
+            `).all();
+
+            if (canchas.length === 0) {
+                throw new Error('No se encontraron las canchas virtuales en la base de datos.');
+            }
+
+            // 2. Obtener caddies disponibles para Tenis ese día en la mañana (asumiendo inicio 07:00)
+            const [y, m, d_part] = fecha.split('-').map(Number);
+            const dateObj = new Date(y, m - 1, d_part);
+            let diaJS = dateObj.getDay(); 
+            let diaProcesado = diaJS === 0 ? 6 : diaJS - 1;
+            
+            const esHoy = (fecha === getLocalDate());
+
+            const caddiesDisponibles = db.prepare(`
+                SELECT u.id, u.nombre, p.horas_acumuladas, p.esta_en_club
+                FROM usuarios u
+                JOIN perfiles_caddie p ON u.id = p.usuario_id
+                JOIN horarios_caddie h ON u.id = h.usuario_id
+                WHERE u.rol_id = 4 
+                AND u.estado = 'Activo'
+                AND h.dia_semana = ? 
+                AND h.es_estudio = 0
+                AND h.manana = 1
+                AND (u.deporte = 'Tenis' OR u.deporte = 'Ambos')
+                AND u.id NOT IN (
+                    SELECT caddie_id FROM servicios 
+                    WHERE fecha_servicio = ? AND estado IN ('Pendiente', 'En Juego') AND caddie_id IS NOT NULL
+                )
+            `).all(diaProcesado, fecha);
+
+            // Ordenar equitativamente
+            caddiesDisponibles.sort((a, b) => {
+                if (esHoy && a.esta_en_club !== b.esta_en_club) {
+                    return b.esta_en_club - a.esta_en_club;
+                }
+                return a.horas_acumuladas - b.horas_acumuladas;
+            });
+
+            // 3. Asignar Caddies a Canchas
+            const insertStmt = db.prepare(`
+                INSERT INTO servicios (socio_id, caddie_id, fecha_servicio, hora_inicio_programada, estado, deporte, observaciones, external_id) 
+                VALUES (?, ?, ?, '07:00', 'Pendiente', 'Tenis', 'Asignación automática de fin de semana', ?)
+            `);
+
+            let asignados = 0;
+            const asignaciones = [];
+
+            // Tomar el mínimo entre canchas disponibles y caddies disponibles
+            const maxAsignaciones = Math.min(canchas.length, caddiesDisponibles.length);
+
+            for (let i = 0; i < maxAsignaciones; i++) {
+                const cancha = canchas[i];
+                const caddie = caddiesDisponibles[i];
+                
+                // Usamos un external_id ficticio o temporal, aquí usamos timestamp
+                const fakeExternalId = Date.now() + i; 
+
+                insertStmt.run(cancha.id, caddie.id, fecha, fakeExternalId);
+                asignados++;
+                asignaciones.push({ cancha: cancha.nombre, caddie: caddie.nombre });
+            }
+
+            return { asignados, asignaciones };
+        });
+
+        const resultado = transaction();
+        res.json({ success: true, message: `Cronograma generado: ${resultado.asignados} canchas asignadas.`, data: resultado });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: error.message || 'Error al generar el cronograma' });
+    }
+});
+
 // --- MÓDULO DE SERVICIOS ---
 
 // Obtener servicios (filtrados por deporte, mes y anio si se especifica)
