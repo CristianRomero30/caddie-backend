@@ -1311,7 +1311,7 @@ app.post('/api/importar-horario', upload.single('file'), (req, res) => {
         
         let deporte = sportHint || (headers.includes('Predio') || req.file.originalname.toLowerCase().includes('tenis') ? 'Tenis' : 'Golf');
         const isTenis = deporte === 'Tenis';
-        const colMap = isTenis ? { socio: 9, fecha: 28, hora: 29, id: 0 } : { socio: 7, fecha: 22, hora: 23, id: 0 };
+        const colMap = isTenis ? { socio: 9, fecha: 28, hora: 29, id: 0, boliador: 21 } : { socio: 7, fecha: 22, hora: 23, id: 0 };
         
         log(`🎯 Deporte detectado: ${deporte} | Mapeo: ${JSON.stringify(colMap)}`);
 
@@ -1321,8 +1321,8 @@ app.post('/api/importar-horario', upload.single('file'), (req, res) => {
 
         const insertStmt = db.prepare(`
             INSERT OR IGNORE INTO servicios 
-            (socio_id, fecha_servicio, hora_inicio_programada, deporte, estado, external_id, observaciones)
-            VALUES (?, ?, ?, ?, 'Pendiente', ?, ?)
+            (socio_id, fecha_servicio, hora_inicio_programada, deporte, estado, external_id, observaciones, tiene_boliador, nombre_boliador)
+            VALUES (?, ?, ?, ?, 'Pendiente', ?, ?, ?, ?)
         `);
 
         const userCheckStmt = db.prepare('SELECT id FROM usuarios WHERE nombre = ? AND rol_id = 3');
@@ -1395,8 +1395,15 @@ app.post('/api/importar-horario', upload.single('file'), (req, res) => {
                         horaStr = rawHora.trim();
                     }
 
+                    let tiene_boliador = 0;
+                    let nombre_boliador = null;
+                    if (isTenis && row[colMap.boliador] && String(row[colMap.boliador]).trim() !== '') {
+                        tiene_boliador = 1;
+                        nombre_boliador = String(row[colMap.boliador]).trim();
+                    }
+
                     const obs = `Importado de 99apps (ID: ${idReserva})`;
-                    const info = insertStmt.run(jugadorId, fechaStr, horaStr, deporte, idReserva, obs);
+                    const info = insertStmt.run(jugadorId, fechaStr, horaStr, deporte, idReserva, obs, tiene_boliador, nombre_boliador);
                     if (info.changes > 0) {
                         importedCount++;
                         if (importedCount % 10 === 0) log(`🔹 Procesadas ${importedCount} filas...`);
