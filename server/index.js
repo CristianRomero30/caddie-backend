@@ -279,9 +279,9 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
     if (!fecha) return res.status(400).json({ success: false, message: 'La fecha es obligatoria' });
 
     try {
-        const transaction = db.transaction(() => {
+        const transaction = db.transaction(async () => {
             // 1. Obtener las 19 canchas (usuarios virtuales)
-            const canchas = db.prepare(`
+            const canchas = await db.prepare(`
                 SELECT id, nombre FROM usuarios 
                 WHERE nombre LIKE 'Cancha %' AND rol_id = 3 
                 ORDER BY CAST(SUBSTR(nombre, 8) AS INTEGER) 
@@ -300,7 +300,7 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
             
             const esHoy = (fecha === getLocalDate());
 
-            const caddiesDisponibles = db.prepare(`
+            const caddiesDisponibles = await db.prepare(`
                 SELECT u.id, u.nombre, p.horas_acumuladas, p.esta_en_club
                 FROM usuarios u
                 JOIN perfiles_caddie p ON u.id = p.usuario_id
@@ -344,7 +344,7 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
                 // Usamos un external_id ficticio o temporal, aquí usamos timestamp
                 const fakeExternalId = Date.now() + i; 
 
-                insertStmt.run(cancha.id, caddie.id, fecha, fakeExternalId);
+                await insertStmt.run(cancha.id, caddie.id, fecha, fakeExternalId);
                 asignados++;
                 asignaciones.push({ cancha: cancha.nombre, caddie: caddie.nombre });
             }
@@ -352,7 +352,7 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
             return { asignados, asignaciones };
         });
 
-        const resultado = transaction();
+        const resultado = await transaction();
         res.json({ success: true, message: `Cronograma generado: ${resultado.asignados} canchas asignadas.`, data: resultado });
 
     } catch (error) {
