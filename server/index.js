@@ -481,6 +481,27 @@ app.get('/api/canchas/disponibles', async (req, res) => {
     }
 });
 
+app.get('/api/canchas/asignaciones', async (req, res) => {
+    const { fecha } = req.query;
+    if (!fecha) return res.status(400).json({ error: 'Falta fecha' });
+
+    try {
+        const query = `
+            SELECT c.nombre as cancha_nombre, cad.nombre as caddie_nombre
+            FROM asignaciones_canchas ac
+            JOIN usuarios c ON ac.cancha_id = c.id
+            JOIN usuarios cad ON ac.caddie_id = cad.id
+            WHERE ac.fecha = ?
+            ORDER BY CAST(SUBSTR(c.nombre, 8) AS INTEGER)
+        `;
+        const asignaciones = await db.prepare(query).all(fecha);
+        res.json(asignaciones);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error recuperando asignaciones' });
+    }
+});
+
 // Crear nuevo servicio
 app.post('/api/servicios', async (req, res) => {
     const { socio_id, caddie_id, fecha_servicio, hora_inicio_programada, observaciones, deporte } = req.body;
