@@ -714,7 +714,7 @@ app.delete('/api/servicios/:id', async (req, res) => {
 // --- MOTOR DE ASIGNACIÓN AUTOMÁTICA Y CRONOGRAMA ---
 
 app.post('/api/cronograma/generar', async (req, res) => {
-    const { fecha } = req.body; 
+    const { fecha, deporte } = req.body;
     if (!fecha) return res.status(400).json({ success: false, message: 'Fecha requerida' });
 
     try {
@@ -730,7 +730,16 @@ app.post('/api/cronograma/generar', async (req, res) => {
         const transaction = db.transaction(async () => {
             const hoy = getLocalDate();
             // 1. Obtener servicios sin caddie
-            const servicios = await db.prepare("SELECT id, hora_inicio_programada, deporte FROM servicios WHERE fecha_servicio = ? AND caddie_id IS NULL ORDER BY hora_inicio_programada ASC").all(fecha);
+            let queryStr = "SELECT id, hora_inicio_programada, deporte FROM servicios WHERE fecha_servicio = ? AND caddie_id IS NULL";
+            const queryParams = [fecha];
+            
+            if (deporte && deporte !== 'Ambos') {
+                queryStr += " AND deporte = ?";
+                queryParams.push(deporte);
+            }
+            queryStr += " ORDER BY hora_inicio_programada ASC";
+
+            const servicios = await db.prepare(queryStr).all(...queryParams);
             log(`🔍 Servicios sin asignar: ${servicios.length}`);
 
             if (servicios.length === 0) return { count: 0, backups: 0 };
