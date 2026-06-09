@@ -349,6 +349,7 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
                 asignaciones.push({ 
                     id: caddie.id, 
                     nombre: caddie.nombre, 
+                    cancha: cancha.nombre,
                     hora_inicio_programada: '07:00', 
                     esta_en_club: caddie.esta_en_club 
                 });
