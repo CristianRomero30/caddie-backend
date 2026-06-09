@@ -337,8 +337,8 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
             let asignados = 0;
             const asignaciones = [];
 
-            // Tomar el mínimo entre canchas disponibles y caddies disponibles
             const maxAsignaciones = Math.min(canchas.length, caddiesDisponibles.length);
+            const canchaCaddiePairs = [];
 
             for (let i = 0; i < maxAsignaciones; i++) {
                 const cancha = canchas[i];
@@ -353,6 +353,46 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
                     hora_inicio_programada: '07:00', 
                     esta_en_club: caddie.esta_en_club 
                 });
+                canchaCaddiePairs.push({ cancha_id: cancha.id, caddie_id: caddie.id });
+            }
+
+            // 4. Distribuir los turnos (servicios) importados a las canchas
+            if (canchaCaddiePairs.length > 0) {
+                // Obtener servicios de tenis sin asignar para esta fecha
+                const serviciosPendientes = await db.prepare(`
+                    SELECT id, hora_inicio_programada 
+                    FROM servicios 
+                    WHERE fecha_servicio = ? 
+                    AND deporte = 'Tenis' 
+                    AND estado IN ('Pendiente', 'En Juego') 
+                    AND cancha_id IS NULL
+                    ORDER BY hora_inicio_programada ASC
+                `).all(fecha);
+
+                // Agrupar por hora
+                const serviciosPorHora = {};
+                for (const serv of serviciosPendientes) {
+                    const hora = serv.hora_inicio_programada;
+                    if (!serviciosPorHora[hora]) serviciosPorHora[hora] = [];
+                    serviciosPorHora[hora].push(serv);
+                }
+
+                const updateServicioStmt = await db.prepare(`
+                    UPDATE servicios 
+                    SET cancha_id = ?, caddie_id = ? 
+                    WHERE id = ?
+                `);
+
+                // Asignar canchas secuencialmente para cada hora
+                for (const hora in serviciosPorHora) {
+                    const serviciosHora = serviciosPorHora[hora];
+                    for (let i = 0; i < serviciosHora.length; i++) {
+                        const servicio = serviciosHora[i];
+                        // Usar módulo por si hay más servicios que canchas asignadas
+                        const par = canchaCaddiePairs[i % canchaCaddiePairs.length];
+                        await updateServicioStmt.run(par.cancha_id, par.caddie_id, servicio.id);
+                    }
+                }
             }
 
             return { asignados, asignaciones };
