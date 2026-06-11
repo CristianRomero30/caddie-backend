@@ -280,12 +280,13 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
 
     try {
         const transaction = db.transaction(async () => {
-            // 1. Obtener las 19 canchas (usuarios virtuales)
+            // 1. Obtener todas las canchas (30 de tenis + 3 de mini tenis)
             const canchas = await db.prepare(`
                 SELECT id, nombre FROM usuarios 
-                WHERE nombre LIKE 'Cancha %' AND rol_id = 3 
-                ORDER BY CAST(SUBSTR(nombre, 8) AS INTEGER) 
-                LIMIT 19
+                WHERE (nombre LIKE 'Cancha %' OR nombre LIKE 'Mini Tenis %') AND rol_id = 3 
+                ORDER BY 
+                    CASE WHEN nombre LIKE 'Cancha %' THEN 0 ELSE 1 END,
+                    CAST(REGEXP_REPLACE(nombre, '[^0-9]', '') AS UNSIGNED)
             `).all();
 
             if (canchas.length === 0) {
@@ -481,12 +482,27 @@ app.get('/api/servicios', async (req, res) => {
             params.push(req.query.fecha);
         }
 
-        query += ' ORDER BY s.fecha_servicio DESC, s.hora_inicio_programada DESC LIMIT 1000';
+        query += ' ORDER BY s.fecha_servicio DESC, s.hora_inicio_programada ASC LIMIT 1000';
         
         const servicios = await db.prepare(query).all(...params);
         res.json(servicios);
     } catch (error) {
         res.status(500).json({ success: false, message: 'Error recuperando servicios' });
+    }
+});
+
+// Obtener todas las canchas (Para listados en manual)
+app.get('/api/canchas', async (req, res) => {
+    try {
+        const query = `
+            SELECT id, nombre FROM usuarios 
+            WHERE (nombre LIKE 'Cancha %' OR nombre LIKE 'Mini Tenis %') AND rol_id = 3 
+            ORDER BY CASE WHEN nombre LIKE 'Cancha %' THEN 0 ELSE 1 END, CAST(REGEXP_REPLACE(nombre, '[^0-9]', '') AS UNSIGNED)
+        `;
+        const canchas = await db.prepare(query).all();
+        res.json(canchas);
+    } catch (error) {
+        res.status(500).json({ error: 'Error recuperando todas las canchas' });
     }
 });
 
@@ -511,7 +527,7 @@ app.get('/api/canchas/disponibles', async (req, res) => {
                 AND cancha_id IS NOT NULL
                 AND (estado = 'En Juego' OR (estado = 'Pendiente' AND hora_inicio_programada = ?))
             )
-            ORDER BY CAST(SUBSTR(c.nombre, 8) AS INTEGER)
+            ORDER BY CASE WHEN c.nombre LIKE 'Cancha %' THEN 0 ELSE 1 END, CAST(REGEXP_REPLACE(c.nombre, '[^0-9]', '') AS UNSIGNED)
         `;
         const canchas = await db.prepare(query).all(fecha, fecha, hora);
         res.json(canchas);
@@ -532,7 +548,7 @@ app.get('/api/canchas/asignaciones', async (req, res) => {
             JOIN usuarios c ON ac.cancha_id = c.id
             JOIN usuarios cad ON ac.caddie_id = cad.id
             WHERE ac.fecha = ?
-            ORDER BY CAST(SUBSTR(c.nombre, 8) AS INTEGER)
+            ORDER BY CASE WHEN c.nombre LIKE 'Cancha %' THEN 0 ELSE 1 END, CAST(REGEXP_REPLACE(c.nombre, '[^0-9]', '') AS UNSIGNED)
         `;
         const asignaciones = await db.prepare(query).all(fecha);
         res.json(asignaciones);
@@ -658,21 +674,37 @@ app.patch('/api/servicios/:id/asignar', async (req, res) => {
     const { id } = req.params;
     const { caddie_id, cancha_id } = req.body;
     try {
-        if (cancha_id) {
-            // Asignación de Cancha (Tenis Finde)
-            // Buscar la fecha del servicio
-            const [servicio] = await db.prepare('SELECT fecha_servicio FROM servicios WHERE id = ?').all(id);
-            if (!servicio) throw new Error('Servicio no encontrado');
+        const [servicio] = await db.prepare('SELECT fecha_servicio, hora_inicio_programada FROM servicios WHERE id = ?').all(id);
+        if (!servicio) throw new Error('Servicio no encontrado');
+
+        if (cancha_id && caddie_id) {
+            // Asignación de ambos (ej. Tenis entre semana)
+            // Validar que la cancha no esté ocupada en ese horario
+            const [ocupado] = await db.prepare(`
+                SELECT id FROM servicios 
+                WHERE fecha_servicio = ? 
+                AND hora_inicio_programada = ? 
+                AND cancha_id = ? 
+                AND estado NOT IN ('Cancelado')
+                AND id != ?
+            `).all(servicio.fecha_servicio, servicio.hora_inicio_programada, cancha_id, id);
             
-            // Buscar caddie asignado a esta cancha en esta fecha
+            if (ocupado) {
+                throw new Error('La cancha seleccionada ya está ocupada en este horario.');
+            }
+            
+            await db.prepare("UPDATE servicios SET caddie_id = ?, cancha_id = ?, estado_confirmacion = 'Pendiente', reporto_llegada = 0, es_puntual = NULL, ubicacion_verificada = 0 WHERE id = ?")
+                .run(caddie_id, cancha_id, id);
+        } else if (cancha_id) {
+            // Solo Cancha (Flujo Tenis Finde original)
             const [asignacion] = await db.prepare('SELECT caddie_id FROM asignaciones_canchas WHERE fecha = ? AND cancha_id = ?').all(servicio.fecha_servicio, cancha_id);
             if (!asignacion) throw new Error('La cancha seleccionada no tiene un caddie asignado para este día.');
             
             await db.prepare("UPDATE servicios SET caddie_id = ?, cancha_id = ?, estado_confirmacion = 'Pendiente', reporto_llegada = 0, es_puntual = NULL, ubicacion_verificada = 0 WHERE id = ?")
                 .run(asignacion.caddie_id, cancha_id, id);
         } else if (caddie_id) {
-            // Asignación normal de Caddie
-            await db.prepare("UPDATE servicios SET caddie_id = ?, cancha_id = NULL, estado_confirmacion = 'Pendiente', reporto_llegada = 0, es_puntual = NULL, ubicacion_verificada = 0 WHERE id = ?")
+            // Solo Caddie, pero MANTENEMOS la cancha que ya tenía (requerimiento del usuario)
+            await db.prepare("UPDATE servicios SET caddie_id = ?, estado_confirmacion = 'Pendiente', reporto_llegada = 0, es_puntual = NULL, ubicacion_verificada = 0 WHERE id = ?")
               .run(caddie_id, id);
         } else {
             throw new Error('Debe proporcionar un caddie o una cancha.');
@@ -776,6 +808,13 @@ app.post('/api/cronograma/generar', async (req, res) => {
             let asignadosCount = 0;
             const caddiesUsados = new Set();
 
+            // Obtener todas las canchas para asignación de tenis
+            const todasLasCanchas = await db.prepare(`
+                SELECT id, nombre FROM usuarios 
+                WHERE (nombre LIKE 'Cancha %' OR nombre LIKE 'Mini Tenis %') AND rol_id = 3 
+                ORDER BY CASE WHEN nombre LIKE 'Cancha %' THEN 0 ELSE 1 END, CAST(REGEXP_REPLACE(nombre, '[^0-9]', '') AS UNSIGNED)
+            `).all();
+
             // 4. Bucle de Asignación
             for (const serv of servicios) {
                 const hour = parseInt(serv.hora_inicio_programada.split(':')[0]);
@@ -809,10 +848,34 @@ app.post('/api/cronograma/generar', async (req, res) => {
                 });
 
                 if (caddie) {
-                    await db.prepare("UPDATE servicios SET caddie_id = ?, estado_confirmacion = 'Pendiente' WHERE id = ?").run(caddie.id, serv.id);
+                    let canchaAsignadaId = null;
+                    if (serv.deporte === 'Tenis') {
+                        const canchasOcupadas = await db.prepare(`
+                            SELECT cancha_id FROM servicios 
+                            WHERE fecha_servicio = ? 
+                            AND hora_inicio_programada = ? 
+                            AND estado NOT IN ('Cancelado')
+                            AND cancha_id IS NOT NULL
+                        `).all(fecha, serv.hora_inicio_programada);
+                        const ocupadasIds = new Set(canchasOcupadas.map(c => c.cancha_id));
+                        
+                        const canchaDisponible = todasLasCanchas.find(c => !ocupadasIds.has(c.id));
+                        if (canchaDisponible) {
+                            canchaAsignadaId = canchaDisponible.id;
+                        } else {
+                            log(`⚠️ No hay canchas disponibles para Turno #${serv.id} a las ${serv.hora_inicio_programada}`);
+                        }
+                    }
+
+                    if (canchaAsignadaId) {
+                        await db.prepare("UPDATE servicios SET caddie_id = ?, cancha_id = ?, estado_confirmacion = 'Pendiente' WHERE id = ?").run(caddie.id, canchaAsignadaId, serv.id);
+                    } else {
+                        await db.prepare("UPDATE servicios SET caddie_id = ?, estado_confirmacion = 'Pendiente' WHERE id = ?").run(caddie.id, serv.id);
+                    }
+                    
                     caddiesUsados.add(caddie.id);
                     asignadosCount++;
-                    log(`✅ Turno #${serv.id} (${serv.hora_inicio_programada}) -> Assigned to ${caddie.nombre} (ID: ${caddie.id})`);
+                    log(`✅ Turno #${serv.id} (${serv.hora_inicio_programada}) -> Assigned to ${caddie.nombre} (ID: ${caddie.id})${canchaAsignadaId ? ` en Cancha ID: ${canchaAsignadaId}` : ''}`);
                 } else {
                     log(`⚠️ No caddie found for Turno #${serv.id} (${serv.hora_inicio_programada}) [Morning=${esManana}]`);
                 }
