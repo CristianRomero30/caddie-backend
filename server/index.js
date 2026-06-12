@@ -256,19 +256,21 @@ app.put('/api/caddies/:id/horario', async (req, res) => {
 
     try {
         const updateStmt = await db.prepare(`
-            INSERT OR REPLACE INTO horarios_caddie (usuario_id, dia_semana, manana, tarde, es_estudio)
+            INSERT INTO horarios_caddie (usuario_id, dia_semana, manana, tarde, es_estudio)
             VALUES (?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE manana=VALUES(manana), tarde=VALUES(tarde), es_estudio=VALUES(es_estudio)
         `);
 
-        const transaction = db.transaction((data) => {
+        const transaction = db.transaction(async (data) => {
             for (const day of data) {
-                updateStmt.run(id, day.dia, day.manana, day.tarde, day.estudio);
+                await updateStmt.run(id, day.dia, day.manana, day.tarde, day.estudio);
             }
         });
 
         await transaction(horario);
         res.json({ success: true, message: 'Horario actualizado' });
     } catch (error) {
+        console.error('Error actualizando horario:', error);
         res.status(500).json({ success: false, message: 'Error actualizando horario' });
     }
 });
