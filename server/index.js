@@ -1593,7 +1593,7 @@ app.post('/api/importar-horario', upload.single('file'), async (req, res) => {
         
         let deporte = sportHint || (headers.includes('Predio') || req.file.originalname.toLowerCase().includes('tenis') ? 'Tenis' : 'Golf');
         const isTenis = deporte === 'Tenis';
-        const colMap = isTenis ? { socio: 9, fecha: 28, hora: 29, id: 0, boliador: 21 } : { socio: 7, fecha: 22, hora: 23, id: 0 };
+        const colMap = isTenis ? { socio: 9, fecha: 28, hora: 29, id: 0, boliador: 21, elemento: 26 } : { socio: 7, fecha: 22, hora: 23, id: 0 };
         
         log(`🎯 Deporte detectado: ${deporte} | Mapeo: ${JSON.stringify(colMap)}`);
 
@@ -1602,14 +1602,16 @@ app.post('/api/importar-horario', upload.single('file'), async (req, res) => {
         const dataRows = rows.slice(3);
 
         const insertStmt = db.prepare(`
-            INSERT IGNORE INTO servicios 
-            (socio_id, fecha_servicio, hora_inicio_programada, deporte, estado, external_id, observaciones, tiene_boliador, nombre_boliador)
-            VALUES (?, ?, ?, ?, 'Pendiente', ?, ?, ?, ?)
+            INSERT INTO servicios 
+            (socio_id, fecha_servicio, hora_inicio_programada, deporte, estado, external_id, observaciones, tiene_boliador, nombre_boliador, cancha_id)
+            VALUES (?, ?, ?, ?, 'Pendiente', ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE cancha_id = COALESCE(VALUES(cancha_id), cancha_id)
         `);
 
         const userCheckStmt = db.prepare('SELECT id FROM usuarios WHERE nombre = ? AND rol_id = 3');
         const userInsertStmt = db.prepare('INSERT INTO usuarios (nombre, email, password, rol_id, deporte, estado) VALUES (?, ?, ?, 3, ?, ?)');
         const userByEmailStmt = db.prepare('SELECT id FROM usuarios WHERE email = ?');
+        const canchaByNameStmt = db.prepare('SELECT id FROM usuarios WHERE nombre = ? AND rol_id = 3');
 
         log('⚙️ Iniciando transacción de base de datos...');
         const performImport = db.transaction(async (rowsToProcess) => {
@@ -1685,8 +1687,22 @@ app.post('/api/importar-horario', upload.single('file'), async (req, res) => {
                         nombre_boliador = String(row[colMap.boliador]).trim();
                     }
 
+                    // 4. Procesar Cancha del Excel (columna ELEMENTO)
+                    let canchaId = null;
+                    if (isTenis && colMap.elemento !== undefined && row[colMap.elemento]) {
+                        const nombreCancha = String(row[colMap.elemento]).trim();
+                        if (nombreCancha) {
+                            const canchaRecord = await canchaByNameStmt.get(nombreCancha);
+                            if (canchaRecord) {
+                                canchaId = canchaRecord.id;
+                            } else {
+                                log(`⚠️ Cancha '${nombreCancha}' no encontrada en BD para fila ${index + 4}`);
+                            }
+                        }
+                    }
+
                     const obs = `Importado de 99apps (ID: ${idReserva})`;
-                    const info = await insertStmt.run(jugadorId, fechaStr, horaStr, deporte, idReserva, obs, tiene_boliador, nombre_boliador);
+                    const info = await insertStmt.run(jugadorId, fechaStr, horaStr, deporte, idReserva, obs, tiene_boliador, nombre_boliador, canchaId);
                     if (info.changes > 0) {
                         importedCount++;
                         if (importedCount % 10 === 0) log(`🔹 Procesadas ${importedCount} filas...`);
