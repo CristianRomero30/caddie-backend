@@ -359,16 +359,16 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
                 canchaCaddiePairs.push({ cancha_id: cancha.id, caddie_id: caddie.id });
             }
 
-            // 4. Distribuir los turnos (servicios) importados a las canchas
+            // 4. Distribuir los turnos (servicios) importados - asignar caddies
             if (canchaCaddiePairs.length > 0) {
-                // Obtener servicios de tenis sin asignar para esta fecha
+                // Obtener servicios de tenis sin caddie para esta fecha
                 const serviciosPendientes = await db.prepare(`
-                    SELECT id, hora_inicio_programada 
+                    SELECT id, hora_inicio_programada, cancha_id 
                     FROM servicios 
                     WHERE fecha_servicio = ? 
                     AND deporte = 'Tenis' 
                     AND estado IN ('Pendiente', 'En Juego') 
-                    AND cancha_id IS NULL
+                    AND caddie_id IS NULL
                     ORDER BY hora_inicio_programada ASC
                 `).all(fecha);
 
@@ -380,20 +380,32 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
                     serviciosPorHora[hora].push(serv);
                 }
 
-                const updateServicioStmt = await db.prepare(`
+                // Stmt para cuando NO tiene cancha (asignar ambos)
+                const updateBothStmt = await db.prepare(`
                     UPDATE servicios 
                     SET cancha_id = ?, caddie_id = ? 
                     WHERE id = ?
                 `);
+                // Stmt para cuando YA tiene cancha del Excel (solo asignar caddie)
+                const updateCaddieOnlyStmt = await db.prepare(`
+                    UPDATE servicios 
+                    SET caddie_id = ? 
+                    WHERE id = ?
+                `);
 
-                // Asignar canchas secuencialmente para cada hora
+                // Asignar caddies, respetando la cancha del Excel
                 for (const hora in serviciosPorHora) {
                     const serviciosHora = serviciosPorHora[hora];
                     for (let i = 0; i < serviciosHora.length; i++) {
                         const servicio = serviciosHora[i];
-                        // Usar módulo por si hay más servicios que canchas asignadas
                         const par = canchaCaddiePairs[i % canchaCaddiePairs.length];
-                        await updateServicioStmt.run(par.cancha_id, par.caddie_id, servicio.id);
+                        if (servicio.cancha_id) {
+                            // Ya tiene cancha del Excel, solo asignar caddie
+                            await updateCaddieOnlyStmt.run(par.caddie_id, servicio.id);
+                        } else {
+                            // No tiene cancha, asignar ambos
+                            await updateBothStmt.run(par.cancha_id, par.caddie_id, servicio.id);
+                        }
                     }
                 }
             }
@@ -764,7 +776,7 @@ app.post('/api/cronograma/generar', async (req, res) => {
         const transaction = db.transaction(async () => {
             const hoy = getLocalDate();
             // 1. Obtener servicios sin caddie
-            let queryStr = "SELECT id, hora_inicio_programada, deporte FROM servicios WHERE fecha_servicio = ? AND caddie_id IS NULL";
+            let queryStr = "SELECT id, hora_inicio_programada, deporte, cancha_id FROM servicios WHERE fecha_servicio = ? AND caddie_id IS NULL";
             const queryParams = [fecha];
             
             if (deporte && deporte !== 'Ambos') {
@@ -852,20 +864,26 @@ app.post('/api/cronograma/generar', async (req, res) => {
                 if (caddie) {
                     let canchaAsignadaId = null;
                     if (serv.deporte === 'Tenis') {
-                        const canchasOcupadas = await db.prepare(`
-                            SELECT cancha_id FROM servicios 
-                            WHERE fecha_servicio = ? 
-                            AND hora_inicio_programada = ? 
-                            AND estado NOT IN ('Cancelado')
-                            AND cancha_id IS NOT NULL
-                        `).all(fecha, serv.hora_inicio_programada);
-                        const ocupadasIds = new Set(canchasOcupadas.map(c => c.cancha_id));
-                        
-                        const canchaDisponible = todasLasCanchas.find(c => !ocupadasIds.has(c.id));
-                        if (canchaDisponible) {
-                            canchaAsignadaId = canchaDisponible.id;
+                        // Si el servicio ya tiene cancha del Excel, respetarla
+                        if (serv.cancha_id) {
+                            canchaAsignadaId = serv.cancha_id;
+                            log(`📌 Turno #${serv.id} ya tiene cancha del Excel (ID: ${serv.cancha_id}), se respeta.`);
                         } else {
-                            log(`⚠️ No hay canchas disponibles para Turno #${serv.id} a las ${serv.hora_inicio_programada}`);
+                            const canchasOcupadas = await db.prepare(`
+                                SELECT cancha_id FROM servicios 
+                                WHERE fecha_servicio = ? 
+                                AND hora_inicio_programada = ? 
+                                AND estado NOT IN ('Cancelado')
+                                AND cancha_id IS NOT NULL
+                            `).all(fecha, serv.hora_inicio_programada);
+                            const ocupadasIds = new Set(canchasOcupadas.map(c => c.cancha_id));
+                            
+                            const canchaDisponible = todasLasCanchas.find(c => !ocupadasIds.has(c.id));
+                            if (canchaDisponible) {
+                                canchaAsignadaId = canchaDisponible.id;
+                            } else {
+                                log(`⚠️ No hay canchas disponibles para Turno #${serv.id} a las ${serv.hora_inicio_programada}`);
+                            }
                         }
                     }
 
