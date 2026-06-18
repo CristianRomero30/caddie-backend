@@ -1649,8 +1649,7 @@ app.post('/api/importar-horario', upload.single('file'), async (req, res) => {
                     const nombreJugador = String(row[colMap.socio] || '').trim();
                     const rawFecha = row[colMap.fecha];
                     const rawHora = row[colMap.hora];
-
-                    if (!idReserva || !nombreJugador) return;
+                    if (!idReserva || !nombreJugador) { index++; continue; }
 
                     // 1. Obtener o Crear Jugador
                     let jugadorId;
