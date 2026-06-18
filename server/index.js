@@ -819,8 +819,13 @@ app.post('/api/cronograma/generar', async (req, res) => {
 
             log(`👥 Caddies con disponibilidad teórica: ${caddiesDisponibles.length}`);
 
-            let asignadosCount = 0;
-            const caddiesUsados = new Set();
+            const turnosExistentes = await db.prepare("SELECT caddie_id, hora_inicio_programada FROM servicios WHERE fecha_servicio = ? AND caddie_id IS NOT NULL AND estado IN ('Pendiente', 'En Juego')").all(fecha);
+            
+            const caddiesUsadosHora = new Map();
+            for (const t of turnosExistentes) {
+                if (!caddiesUsadosHora.has(t.caddie_id)) caddiesUsadosHora.set(t.caddie_id, new Set());
+                caddiesUsadosHora.get(t.caddie_id).add(t.hora_inicio_programada);
+            }
 
             // Obtener todas las canchas para asignación de tenis
             const todasLasCanchas = await db.prepare(`
@@ -835,7 +840,8 @@ app.post('/api/cronograma/generar', async (req, res) => {
                 const esManana = hour < 12;
 
                 const caddie = caddiesDisponibles.find(c => {
-                    if (caddiesUsados.has(c.id)) return false;
+                    const assignedHours = caddiesUsadosHora.get(c.id) || new Set();
+                    if (assignedHours.has(serv.hora_inicio_programada)) return false;
                     
                     // Verificar que el caddie pertenezca al área del servicio (Golf o Tenis)
                     if (c.deporte !== 'Ambos' && serv.deporte && c.deporte !== serv.deporte) {
@@ -893,7 +899,8 @@ app.post('/api/cronograma/generar', async (req, res) => {
                         await db.prepare("UPDATE servicios SET caddie_id = ?, estado_confirmacion = 'Pendiente' WHERE id = ?").run(caddie.id, serv.id);
                     }
                     
-                    caddiesUsados.add(caddie.id);
+                    if (!caddiesUsadosHora.has(caddie.id)) caddiesUsadosHora.set(caddie.id, new Set());
+                    caddiesUsadosHora.get(caddie.id).add(serv.hora_inicio_programada);
                     asignadosCount++;
                     log(`✅ Turno #${serv.id} (${serv.hora_inicio_programada}) -> Assigned to ${caddie.nombre} (ID: ${caddie.id})${canchaAsignadaId ? ` en Cancha ID: ${canchaAsignadaId}` : ''}`);
                 } else {
@@ -1071,7 +1078,7 @@ app.post('/api/incidencias', async (req, res) => {
                     AND ( ( ? = 1 AND h.manana = 1 ) OR ( ? = 0 AND h.tarde = 1 ) )
                     AND u.id != ?
                     AND (u.deporte = 'Ambos' OR u.deporte = ?)
-                    AND u.id NOT IN (SELECT caddie_id FROM servicios WHERE fecha_servicio = ? AND estado IN ('Pendiente', 'En Juego'))
+                    AND u.id NOT IN (SELECT caddie_id FROM servicios WHERE fecha_servicio = ? AND hora_inicio_programada = ? AND estado IN ('Pendiente', 'En Juego'))
                     AND u.id NOT IN (
                         SELECT reportado_por_id FROM incidencias 
                         WHERE (? BETWEEN IFNULL(fecha_inicio, date(fecha_reporte)) AND IFNULL(fecha_fin, date(fecha_reporte)))
@@ -1079,7 +1086,7 @@ app.post('/api/incidencias', async (req, res) => {
                     )
                     ORDER BY ${orderBy}
                     LIMIT 1
-                `).get(diaSemana, esManana ? 1 : 0, esManana ? 1 : 0, reportado_por_id, servInfo.deporte, servInfo.fecha_servicio, servInfo.fecha_servicio, servInfo.hora_inicio_programada);
+                `).get(diaSemana, esManana ? 1 : 0, esManana ? 1 : 0, reportado_por_id, servInfo.deporte, servInfo.fecha_servicio, servInfo.hora_inicio_programada, servInfo.fecha_servicio, servInfo.hora_inicio_programada);
 
                 if (reemplazo) {
                     await db.prepare(`
@@ -1276,10 +1283,10 @@ app.get('/api/caddies/disponibles', async (req, res) => {
         query += `
             AND u.id NOT IN (
                 SELECT caddie_id FROM servicios 
-                WHERE fecha_servicio = ? AND estado IN ('Pendiente', 'En Juego') AND caddie_id IS NOT NULL
+                WHERE fecha_servicio = ? AND hora_inicio_programada = ? AND estado IN ('Pendiente', 'En Juego') AND caddie_id IS NOT NULL
             )
         `;
-        params.push(fecha);
+        params.push(fecha, hora);
 
         const disponibles = await db.prepare(query).all(...params);
         
