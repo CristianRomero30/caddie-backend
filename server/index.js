@@ -835,6 +835,7 @@ app.post('/api/cronograma/generar', async (req, res) => {
             `).all();
 
             // 4. Bucle de Asignación
+            let asignadosCount = 0;
             for (const serv of servicios) {
                 const hour = parseInt(serv.hora_inicio_programada.split(':')[0]);
                 const esManana = hour < 12;
