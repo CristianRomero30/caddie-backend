@@ -1145,6 +1145,29 @@ app.post('/api/perfil/estado-club', async (req, res) => {
     }
 });
 
+app.post('/api/perfil/estado-club-bulk', async (req, res) => {
+    const { caddieIds, esta_en_club } = req.body;
+    if (!Array.isArray(caddieIds)) return res.status(400).json({ success: false, message: 'caddieIds must be an array' });
+    try {
+        const updateStmt = db.prepare(`
+            UPDATE perfiles_caddie 
+            SET esta_en_club = ?, fecha_entrada_club = ? 
+            WHERE usuario_id = ?
+        `);
+        const transaction = db.transaction((ids) => {
+            const date = esta_en_club ? new Date().toISOString() : null;
+            for (const id of ids) {
+                updateStmt.run(esta_en_club ? 1 : 0, date, id);
+            }
+        });
+        transaction(caddieIds);
+        res.json({ success: true, count: caddieIds.length });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
 // Listar todos los usuarios (Staff y Jugadores)
 app.get('/api/usuarios', async (req, res) => {
     try {
