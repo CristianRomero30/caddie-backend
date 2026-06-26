@@ -126,6 +126,7 @@ async function initDB() {
     try { await db.prepare('ALTER TABLE incidencias ADD COLUMN todo_el_dia INTEGER DEFAULT 0').run(); } catch (e) {}
     try { await db.prepare('ALTER TABLE servicios ADD COLUMN tiene_boliador INTEGER DEFAULT 0').run(); } catch (e) {}
     try { await db.prepare('ALTER TABLE servicios ADD COLUMN nombre_boliador TEXT').run(); } catch (e) {}
+    try { await db.prepare('ALTER TABLE horarios_caddie ADD COLUMN horas_disponibles JSON').run(); } catch (e) {}
 }
 initDB();
 
@@ -222,8 +223,7 @@ app.get('/api/caddies', async (req, res) => {
                 (SELECT JSON_ARRAYAGG(
                     json_object(
                         'dia', dia_semana, 
-                        'manana', manana, 
-                        'tarde', tarde, 
+                        'horas_disponibles', horas_disponibles, 
                         'estudio', es_estudio
                     )
                 ) FROM horarios_caddie WHERE usuario_id = u.id) as horario
@@ -256,14 +256,15 @@ app.put('/api/caddies/:id/horario', async (req, res) => {
 
     try {
         const updateStmt = await db.prepare(`
-            INSERT INTO horarios_caddie (usuario_id, dia_semana, manana, tarde, es_estudio)
-            VALUES (?, ?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE manana=VALUES(manana), tarde=VALUES(tarde), es_estudio=VALUES(es_estudio)
+            INSERT INTO horarios_caddie (usuario_id, dia_semana, horas_disponibles, es_estudio)
+            VALUES (?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE horas_disponibles=VALUES(horas_disponibles), es_estudio=VALUES(es_estudio)
         `);
 
         const transaction = db.transaction(async (data) => {
             for (const day of data) {
-                await updateStmt.run(id, day.dia, day.manana, day.tarde, day.estudio);
+                const horasStr = JSON.stringify(day.horas_disponibles || []);
+                await updateStmt.run(id, day.dia, horasStr, day.estudio ? 1 : 0);
             }
         });
 
@@ -312,7 +313,7 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
                 AND u.estado = 'Activo'
                 AND h.dia_semana = ? 
                 AND h.es_estudio = 0
-                AND h.manana = 1
+                AND JSON_CONTAINS(COALESCE(h.horas_disponibles, '[]'), '7')
                 AND (u.deporte = 'Tenis' OR u.deporte = 'Ambos')
                 AND u.id NOT IN (
                     SELECT caddie_id FROM servicios 
