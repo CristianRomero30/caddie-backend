@@ -1170,6 +1170,67 @@ app.post('/api/perfil/estado-club-bulk', async (req, res) => {
     }
 });
 
+// --- NUEVO: Gestión de Backups Programados ---
+app.get('/api/backups', async (req, res) => {
+    const { fecha, deporte } = req.query;
+    try {
+        let query = `
+            SELECT b.*, u.nombre 
+            FROM backups_programados b
+            JOIN usuarios u ON b.caddie_id = u.id
+            WHERE b.fecha = ?
+        `;
+        const params = [fecha];
+        if (deporte && deporte !== 'Ambos') {
+            query += ` AND b.deporte = ?`;
+            params.push(deporte);
+        }
+        const backups = await db.prepare(query).all(...params);
+        res.json(backups);
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.post('/api/backups', async (req, res) => {
+    const { fecha, deporte, turno, caddieIds } = req.body;
+    try {
+        const transaction = db.transaction(async (ids) => {
+            // Eliminar los anteriores para esa fecha, deporte y turno
+            await db.prepare(`DELETE FROM backups_programados WHERE fecha = ? AND deporte = ? AND turno = ?`).run(fecha, deporte, turno);
+            
+            // Insertar los nuevos
+            const insertStmt = db.prepare(`INSERT INTO backups_programados (fecha, deporte, turno, caddie_id) VALUES (?, ?, ?, ?)`);
+            for (const id of ids) {
+                await insertStmt.run(fecha, deporte, turno, id);
+            }
+        });
+        await transaction(caddieIds || []);
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.put('/api/backups/:id', async (req, res) => {
+    const { caddie_id } = req.body;
+    try {
+        await db.prepare(`UPDATE backups_programados SET caddie_id = ? WHERE id = ?`).run(caddie_id, req.params.id);
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.delete('/api/backups/:id', async (req, res) => {
+    try {
+        await db.prepare(`DELETE FROM backups_programados WHERE id = ?`).run(req.params.id);
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
 // Listar todos los usuarios (Staff y Jugadores)
 app.get('/api/usuarios', async (req, res) => {
     try {
