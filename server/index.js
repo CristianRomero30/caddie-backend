@@ -223,8 +223,10 @@ app.get('/api/caddies', async (req, res) => {
                 (SELECT JSON_ARRAYAGG(
                     json_object(
                         'dia', dia_semana, 
-                        'horas_disponibles', horas_disponibles, 
-                        'estudio', es_estudio
+                        'manana', manana, 
+                        'tarde', tarde, 
+                        'estudio', es_estudio,
+                        'horas_disponibles', horas_disponibles
                     )
                 ) FROM horarios_caddie WHERE usuario_id = u.id) as horario
             FROM usuarios u
@@ -256,15 +258,15 @@ app.put('/api/caddies/:id/horario', async (req, res) => {
 
     try {
         const updateStmt = await db.prepare(`
-            INSERT INTO horarios_caddie (usuario_id, dia_semana, horas_disponibles, es_estudio)
-            VALUES (?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE horas_disponibles=VALUES(horas_disponibles), es_estudio=VALUES(es_estudio)
+            INSERT INTO horarios_caddie (usuario_id, dia_semana, manana, tarde, es_estudio, horas_disponibles)
+            VALUES (?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE manana=VALUES(manana), tarde=VALUES(tarde), es_estudio=VALUES(es_estudio), horas_disponibles=VALUES(horas_disponibles)
         `);
 
         const transaction = db.transaction(async (data) => {
             for (const day of data) {
-                const horasStr = JSON.stringify(day.horas_disponibles || []);
-                await updateStmt.run(id, day.dia, horasStr, day.estudio ? 1 : 0);
+                const horasJson = JSON.stringify(day.horas_disponibles || []);
+                await updateStmt.run(id, day.dia, day.manana, day.tarde, day.estudio, horasJson);
             }
         });
 
@@ -313,7 +315,7 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
                 AND u.estado = 'Activo'
                 AND h.dia_semana = ? 
                 AND h.es_estudio = 0
-                AND JSON_CONTAINS(COALESCE(h.horas_disponibles, '[]'), '7')
+                AND h.manana = 1
                 AND (u.deporte = 'Tenis' OR u.deporte = 'Ambos')
                 AND u.id NOT IN (
                     SELECT caddie_id FROM servicios 
