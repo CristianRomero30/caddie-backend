@@ -219,7 +219,7 @@ app.get('/api/caddies', async (req, res) => {
         let query = `
             SELECT 
                 u.id, u.nombre, u.email, u.estado, u.deporte,
-                p.horas_acumuladas, p.calificacion, p.disponibilidad, p.esta_en_club, p.fecha_entrada_club,
+                p.horas_acumuladas, p.calificacion, p.disponibilidad, p.esta_en_club, p.fecha_entrada_club, p.turno_backup,
                 (SELECT JSON_ARRAYAGG(
                     json_object(
                         'dia', dia_semana, 
@@ -1132,13 +1132,13 @@ app.post('/api/incidencias', async (req, res) => {
 
 // --- NUEVO: Estado en Club ---
 app.post('/api/perfil/estado-club', async (req, res) => {
-    const { usuario_id, esta_en_club } = req.body;
+    const { usuario_id, esta_en_club, turno_backup } = req.body;
     try {
         await db.prepare(`
             UPDATE perfiles_caddie 
-            SET esta_en_club = ?, fecha_entrada_club = ? 
+            SET esta_en_club = ?, fecha_entrada_club = ?, turno_backup = ?
             WHERE usuario_id = ?
-        `).run(esta_en_club ? 1 : 0, esta_en_club ? new Date().toISOString() : null, usuario_id);
+        `).run(esta_en_club ? 1 : 0, esta_en_club ? new Date().toISOString() : null, esta_en_club ? (turno_backup || null) : null, usuario_id);
         res.json({ success: true });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -1146,18 +1146,19 @@ app.post('/api/perfil/estado-club', async (req, res) => {
 });
 
 app.post('/api/perfil/estado-club-bulk', async (req, res) => {
-    const { caddieIds, esta_en_club } = req.body;
+    const { caddieIds, esta_en_club, turno_backup } = req.body;
     if (!Array.isArray(caddieIds)) return res.status(400).json({ success: false, message: 'caddieIds must be an array' });
     try {
         const updateStmt = db.prepare(`
             UPDATE perfiles_caddie 
-            SET esta_en_club = ?, fecha_entrada_club = ? 
+            SET esta_en_club = ?, fecha_entrada_club = ?, turno_backup = ?
             WHERE usuario_id = ?
         `);
         const transaction = db.transaction((ids) => {
             const date = esta_en_club ? new Date().toISOString() : null;
+            const turno = esta_en_club ? (turno_backup || null) : null;
             for (const id of ids) {
-                updateStmt.run(esta_en_club ? 1 : 0, date, id);
+                updateStmt.run(esta_en_club ? 1 : 0, date, turno, id);
             }
         });
         transaction(caddieIds);
@@ -1785,6 +1786,30 @@ app.post('/api/importar-horario', upload.single('file'), async (req, res) => {
     } catch (error) {
         log(`❌ [IMPORT] Error crítico: ${error.message}`);
         res.status(500).json({ success: false, message: 'Error procesando el archivo: ' + error.message });
+    }
+});
+
+// --- REPORTES ---
+app.get('/api/reportes/puntualidad', async (req, res) => {
+    try {
+        const report = await db.prepare(`
+            SELECT 
+                u.id as caddie_id,
+                u.nombre as caddie_nombre,
+                COUNT(s.id) as total_servicios,
+                SUM(CASE WHEN s.es_puntual = 1 AND (s.estado_confirmacion != 'Reasignado por novedad' AND s.estado_confirmacion != 'Rechazado') THEN 1 ELSE 0 END) as puntuales,
+                SUM(CASE WHEN s.es_puntual = 0 AND (s.estado_confirmacion != 'Reasignado por novedad' AND s.estado_confirmacion != 'Rechazado') THEN 1 ELSE 0 END) as tardanzas,
+                SUM(CASE WHEN s.estado_confirmacion = 'Reasignado por novedad' OR s.estado_confirmacion = 'Rechazado' THEN 1 ELSE 0 END) as novedades
+            FROM usuarios u
+            LEFT JOIN servicios s ON u.id = s.caddie_id
+            WHERE u.rol_id = 4 AND u.estado = 'Activo'
+            GROUP BY u.id
+            ORDER BY u.nombre
+        `).all();
+        res.json(report);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Error al generar reporte de puntualidad' });
     }
 });
 
