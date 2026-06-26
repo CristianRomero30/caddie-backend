@@ -219,7 +219,7 @@ app.get('/api/caddies', async (req, res) => {
         let query = `
             SELECT 
                 u.id, u.nombre, u.email, u.estado, u.deporte,
-                p.horas_acumuladas, p.calificacion, p.disponibilidad, p.esta_en_club, p.fecha_entrada_club, p.turno_backup,
+                p.horas_acumuladas, p.calificacion, p.disponibilidad, p.esta_en_club, p.fecha_entrada_club, p.turno_backup, p.deporte_backup,
                 (SELECT JSON_ARRAYAGG(
                     json_object(
                         'dia', dia_semana, 
@@ -1132,13 +1132,13 @@ app.post('/api/incidencias', async (req, res) => {
 
 // --- NUEVO: Estado en Club ---
 app.post('/api/perfil/estado-club', async (req, res) => {
-    const { usuario_id, esta_en_club, turno_backup } = req.body;
+    const { usuario_id, esta_en_club, turno_backup, deporte_backup } = req.body;
     try {
         await db.prepare(`
             UPDATE perfiles_caddie 
-            SET esta_en_club = ?, fecha_entrada_club = ?, turno_backup = ?
+            SET esta_en_club = ?, fecha_entrada_club = ?, turno_backup = ?, deporte_backup = ?
             WHERE usuario_id = ?
-        `).run(esta_en_club ? 1 : 0, esta_en_club ? new Date().toISOString() : null, esta_en_club ? (turno_backup || null) : null, usuario_id);
+        `).run(esta_en_club ? 1 : 0, esta_en_club ? new Date().toISOString() : null, esta_en_club ? (turno_backup || null) : null, esta_en_club ? (deporte_backup || null) : null, usuario_id);
         res.json({ success: true });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -1146,19 +1146,20 @@ app.post('/api/perfil/estado-club', async (req, res) => {
 });
 
 app.post('/api/perfil/estado-club-bulk', async (req, res) => {
-    const { caddieIds, esta_en_club, turno_backup } = req.body;
+    const { caddieIds, esta_en_club, turno_backup, deporte_backup } = req.body;
     if (!Array.isArray(caddieIds)) return res.status(400).json({ success: false, message: 'caddieIds must be an array' });
     try {
         const updateStmt = db.prepare(`
             UPDATE perfiles_caddie 
-            SET esta_en_club = ?, fecha_entrada_club = ?, turno_backup = ?
+            SET esta_en_club = ?, fecha_entrada_club = ?, turno_backup = ?, deporte_backup = ?
             WHERE usuario_id = ?
         `);
         const transaction = db.transaction((ids) => {
             const date = esta_en_club ? new Date().toISOString() : null;
             const turno = esta_en_club ? (turno_backup || null) : null;
+            const deporte = esta_en_club ? (deporte_backup || null) : null;
             for (const id of ids) {
-                updateStmt.run(esta_en_club ? 1 : 0, date, turno, id);
+                updateStmt.run(esta_en_club ? 1 : 0, date, turno, deporte, id);
             }
         });
         transaction(caddieIds);
