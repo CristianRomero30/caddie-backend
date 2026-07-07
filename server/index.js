@@ -691,7 +691,7 @@ app.patch('/api/servicios/:id/asignar', async (req, res) => {
     const { id } = req.params;
     const { caddie_id, cancha_id } = req.body;
     try {
-        const [servicio] = await db.prepare('SELECT fecha_servicio, hora_inicio_programada FROM servicios WHERE id = ?').all(id);
+        const [servicio] = await db.prepare('SELECT fecha_servicio, hora_inicio_programada, deporte FROM servicios WHERE id = ?').all(id);
         if (!servicio) throw new Error('Servicio no encontrado');
 
         if (cancha_id && caddie_id) {
@@ -830,6 +830,12 @@ app.post('/api/cronograma/generar', async (req, res) => {
                 caddiesUsadosHora.get(t.caddie_id).add(t.hora_inicio_programada);
             }
 
+            const turnosGolfExistentes = await db.prepare("SELECT caddie_id, COUNT(*) as count FROM servicios WHERE fecha_servicio = ? AND caddie_id IS NOT NULL AND LOWER(deporte) = 'golf' AND estado NOT IN ('Cancelado') GROUP BY caddie_id").all(fecha);
+            const caddiesGolfCount = new Map();
+            for (const t of turnosGolfExistentes) {
+                caddiesGolfCount.set(t.caddie_id, t.count);
+            }
+
             // Obtener todas las canchas para asignación de tenis
             const todasLasCanchas = await db.prepare(`
                 SELECT id, nombre FROM usuarios 
@@ -850,6 +856,12 @@ app.post('/api/cronograma/generar', async (req, res) => {
                     // Verificar que el caddie pertenezca al área del servicio (Golf o Tenis)
                     if (c.deporte !== 'Ambos' && serv.deporte && c.deporte !== serv.deporte) {
                         return false;
+                    }
+
+                    // Validación de máximo 1 turno de golf por día en automático
+                    if ((serv.deporte || '').toLowerCase() === 'golf') {
+                        const count = caddiesGolfCount.get(c.id) || 0;
+                        if (count >= 1) return false;
                     }
 
                     // Verificar si tiene novedad bloqueante
@@ -905,6 +917,11 @@ app.post('/api/cronograma/generar', async (req, res) => {
                     
                     if (!caddiesUsadosHora.has(caddie.id)) caddiesUsadosHora.set(caddie.id, new Set());
                     caddiesUsadosHora.get(caddie.id).add(serv.hora_inicio_programada);
+                    
+                    if ((serv.deporte || '').toLowerCase() === 'golf') {
+                        caddiesGolfCount.set(caddie.id, (caddiesGolfCount.get(caddie.id) || 0) + 1);
+                    }
+                    
                     asignadosCount++;
                     log(`✅ Turno #${serv.id} (${serv.hora_inicio_programada}) -> Assigned to ${caddie.nombre} (ID: ${caddie.id})${canchaAsignadaId ? ` en Cancha ID: ${canchaAsignadaId}` : ''}`);
                 } else {
