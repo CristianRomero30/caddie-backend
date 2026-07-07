@@ -1631,18 +1631,18 @@ app.post('/api/caddies', async (req, res) => {
         
         const transaction = db.transaction(async () => {
             // 1. Crear Usuario (rol_id 4 = Caddie)
-            const userStmt = await db.prepare("INSERT INTO usuarios (nombre, email, password, telefono, deporte, rol_id, estado) VALUES (?, ?, ?, ?, ?, 4, 'Activo')");
-            const userResult = userStmt.run(nombre, email, hashedPassword, telefono, deporte);
+            const userStmt = db.prepare("INSERT INTO usuarios (nombre, email, password, telefono, deporte, rol_id, estado) VALUES (?, ?, ?, ?, ?, 4, 'Activo')");
+            const userResult = await userStmt.run(nombre, email, hashedPassword, telefono, deporte);
             const userId = userResult.lastInsertRowid;
 
             // 2. Crear Perfil
             const profileStmt = db.prepare("INSERT INTO perfiles_caddie (usuario_id, horas_acumuladas, calificacion, disponibilidad) VALUES (?, 0, 5.0, 'Disponible')");
-            profileStmt.run(userId);
+            await profileStmt.run(userId);
 
             // 3. Crear Horario Base (Lunes a Domingo - Disponible todo el día)
             const horarioStmt = db.prepare('INSERT INTO horarios_caddie (usuario_id, dia_semana, manana, tarde, es_estudio) VALUES (?, ?, 1, 1, 0)');
             for (let i = 0; i <= 6; i++) {
-                horarioStmt.run(userId, i);
+                await horarioStmt.run(userId, i);
             }
 
             return userId;
