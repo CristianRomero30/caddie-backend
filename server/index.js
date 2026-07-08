@@ -843,25 +843,37 @@ app.post('/api/cronograma/generar', async (req, res) => {
                 ORDER BY CASE WHEN nombre LIKE 'Cancha %' THEN 0 ELSE 1 END, CAST(REGEXP_REPLACE(nombre, '[^0-9]', '') AS UNSIGNED)
             `).all();
 
+            // Obtener backups de la mañana de Tenis
+            const backupsMananaTenisDB = await db.prepare("SELECT caddie_id FROM backups_programados WHERE fecha = ? AND turno = 'mañana' AND deporte = 'Tenis'").all(fecha);
+            const morningTenisBackups = new Set(backupsMananaTenisDB.map(b => b.caddie_id));
+
             // 4. Bucle de Asignación
             let asignadosCount = 0;
             for (const serv of servicios) {
                 const hour = parseInt(serv.hora_inicio_programada.split(':')[0]);
                 const esManana = hour < 12;
 
-                const caddie = caddiesDisponibles.find(c => {
+                let bestCaddie = null;
+                let minTurnsToday = Infinity;
+
+                for (const c of caddiesDisponibles) {
                     const assignedHours = caddiesUsadosHora.get(c.id) || new Set();
-                    if (assignedHours.has(serv.hora_inicio_programada)) return false;
+                    if (assignedHours.has(serv.hora_inicio_programada)) continue;
                     
                     // Verificar que el caddie pertenezca al área del servicio (Golf o Tenis)
                     if (c.deporte !== 'Ambos' && serv.deporte && c.deporte !== serv.deporte) {
-                        return false;
+                        continue;
+                    }
+
+                    // Los backups de la mañana de tenis no pueden ser asignados a turnos de las 6:00 AM (hour < 7)
+                    if (hour < 7 && morningTenisBackups.has(c.id)) {
+                        continue;
                     }
 
                     // Validación de máximo 1 turno de golf por día en automático
                     if ((serv.deporte || '').toLowerCase() === 'golf') {
                         const count = caddiesGolfCount.get(c.id) || 0;
-                        if (count >= 1) return false;
+                        if (count >= 1) continue;
                     }
 
                     // Verificar si tiene novedad bloqueante
@@ -877,11 +889,26 @@ app.post('/api/cronograma/generar', async (req, res) => {
                         return false;
                     });
 
-                    if (tieneNovedad) return false;
+                    if (tieneNovedad) continue;
 
                     const cumpleTurno = esManana ? c.manana === 1 : c.tarde === 1;
-                    return cumpleTurno;
-                });
+                    if (!cumpleTurno) continue;
+
+                    // Si es válido, verificamos equidad del día
+                    const turnsToday = assignedHours.size;
+                    
+                    if (turnsToday < minTurnsToday) {
+                        bestCaddie = c;
+                        minTurnsToday = turnsToday;
+                    }
+                    
+                    // Si encontramos uno con 0 turnos hoy, es el mejor candidato posible (ya viene ordenado por equidad histórica)
+                    if (minTurnsToday === 0) {
+                        break;
+                    }
+                }
+
+                const caddie = bestCaddie;
 
                 if (caddie) {
                     let canchaAsignadaId = null;
