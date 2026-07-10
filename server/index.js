@@ -847,6 +847,10 @@ app.post('/api/cronograma/generar', async (req, res) => {
             const backupsMananaTenisDB = await db.prepare("SELECT caddie_id FROM backups_programados WHERE fecha = ? AND turno = 'mañana' AND deporte = 'Tenis'").all(fecha);
             const morningTenisBackups = new Set(backupsMananaTenisDB.map(b => b.caddie_id));
 
+            // Obtener todos los backups de Golf
+            const backupsGolfDB = await db.prepare("SELECT caddie_id FROM backups_programados WHERE fecha = ? AND deporte = 'Golf'").all(fecha);
+            const golfBackups = new Set(backupsGolfDB.map(b => b.caddie_id));
+
             // 4. Bucle de Asignación
             let asignadosCount = 0;
             for (const serv of servicios) {
@@ -862,6 +866,11 @@ app.post('/api/cronograma/generar', async (req, res) => {
                     
                     // Verificar que el caddie pertenezca al área del servicio (Golf o Tenis)
                     if (c.deporte !== 'Ambos' && serv.deporte && c.deporte !== serv.deporte) {
+                        continue;
+                    }
+
+                    // Los backups de golf no pueden ser asignados con generación automática a ningún turno
+                    if (golfBackups.has(c.id)) {
                         continue;
                     }
 
