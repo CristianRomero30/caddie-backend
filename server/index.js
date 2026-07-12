@@ -322,8 +322,10 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
                     WHERE fecha_servicio = ? AND estado IN ('Pendiente', 'En Juego') AND caddie_id IS NOT NULL
                     UNION
                     SELECT caddie_id FROM asignaciones_canchas WHERE fecha = ?
+                    UNION
+                    SELECT caddie_id FROM backups_programados WHERE fecha = ?
                 )
-            `).all(diaProcesado, fecha, fecha);
+            `).all(diaProcesado, fecha, fecha, fecha);
 
             // Ordenar equitativamente
             caddiesDisponibles.sort((a, b) => {
@@ -396,18 +398,33 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
                     WHERE id = ?
                 `);
 
-                // Asignar caddies, respetando la cancha del Excel
+                // Mapa rápido de cancha -> caddie asignado para hoy
+                const courtToCaddieMap = new Map();
+                canchaCaddiePairs.forEach(p => courtToCaddieMap.set(p.cancha_id, p.caddie_id));
+
+                // Asignar caddies, respetando estrictamente que 1 caddie = 1 cancha todo el día
                 for (const hora in serviciosPorHora) {
                     const serviciosHora = serviciosPorHora[hora];
-                    for (let i = 0; i < serviciosHora.length; i++) {
-                        const servicio = serviciosHora[i];
-                        const par = canchaCaddiePairs[i % canchaCaddiePairs.length];
+                    
+                    // Registrar canchas ya ocupadas en esta hora por el Excel
+                    const canchasOcupadasEstaHora = new Set(
+                        serviciosHora.map(s => s.cancha_id).filter(id => id != null)
+                    );
+
+                    for (const servicio of serviciosHora) {
                         if (servicio.cancha_id) {
-                            // Ya tiene cancha del Excel, solo asignar caddie
-                            await updateCaddieOnlyStmt.run(par.caddie_id, servicio.id);
+                            // Ya tiene cancha del Excel. Asignarle el caddie que le tocó a ESA cancha hoy.
+                            const caddieAsignado = courtToCaddieMap.get(servicio.cancha_id);
+                            if (caddieAsignado) {
+                                await updateCaddieOnlyStmt.run(caddieAsignado, servicio.id);
+                            }
                         } else {
-                            // No tiene cancha, asignar ambos
-                            await updateBothStmt.run(par.cancha_id, par.caddie_id, servicio.id);
+                            // No tiene cancha. Buscar una cancha que tenga caddie hoy y esté LIBRE en esta hora.
+                            const parDisponible = canchaCaddiePairs.find(p => !canchasOcupadasEstaHora.has(p.cancha_id));
+                            if (parDisponible) {
+                                canchasOcupadasEstaHora.add(parDisponible.cancha_id);
+                                await updateBothStmt.run(parDisponible.cancha_id, parDisponible.caddie_id, servicio.id);
+                            }
                         }
                     }
                 }
