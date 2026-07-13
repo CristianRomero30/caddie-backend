@@ -605,9 +605,21 @@ app.get('/api/canchas/asignaciones', async (req, res) => {
             JOIN usuarios c ON ac.cancha_id = c.id
             JOIN usuarios cad ON ac.caddie_id = cad.id
             WHERE ac.fecha = ?
-            ORDER BY CASE WHEN c.nombre LIKE 'Cancha %' THEN 0 ELSE 1 END, CAST(REGEXP_REPLACE(c.nombre, '[^0-9]', '') AS UNSIGNED)
         `;
         const asignaciones = await db.prepare(query).all(fecha);
+        
+        asignaciones.sort((a, b) => {
+            const isMiniA = a.cancha_nombre.toLowerCase().includes('mini');
+            const isMiniB = b.cancha_nombre.toLowerCase().includes('mini');
+            if (isMiniA !== isMiniB) return isMiniA ? 1 : -1;
+            
+            const numA = parseInt((a.cancha_nombre.match(/\d+/) || [0])[0], 10);
+            const numB = parseInt((b.cancha_nombre.match(/\d+/) || [0])[0], 10);
+            if (numA !== numB) return numA - numB;
+            
+            return a.cancha_nombre.localeCompare(b.cancha_nombre);
+        });
+
         res.json(asignaciones);
     } catch (error) {
         console.error(error);
