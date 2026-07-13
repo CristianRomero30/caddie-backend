@@ -289,10 +289,20 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
             const canchas = await db.prepare(`
                 SELECT id, nombre FROM usuarios 
                 WHERE (nombre LIKE 'Cancha %' OR nombre LIKE 'Mini Tenis %') AND rol_id = 3 
-                ORDER BY 
-                    CASE WHEN nombre LIKE 'Cancha %' THEN 0 ELSE 1 END,
-                    CAST(REGEXP_REPLACE(nombre, '[^0-9]', '') AS UNSIGNED)
             `).all();
+
+            // Ordenar estricamente en JS para evitar problemas de compatibilidad SQL
+            canchas.sort((a, b) => {
+                const isMiniA = a.nombre.toLowerCase().includes('mini');
+                const isMiniB = b.nombre.toLowerCase().includes('mini');
+                if (isMiniA !== isMiniB) return isMiniA ? 1 : -1;
+                
+                const numA = parseInt((a.nombre.match(/\d+/) || [0])[0], 10);
+                const numB = parseInt((b.nombre.match(/\d+/) || [0])[0], 10);
+                if (numA !== numB) return numA - numB;
+                
+                return a.nombre.localeCompare(b.nombre);
+            });
 
             if (canchas.length === 0) {
                 throw new Error('No se encontraron las canchas virtuales en la base de datos.');
@@ -439,6 +449,27 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: error.message || 'Error al generar el cronograma' });
+    }
+});
+
+// Obtener asignaciones de canchas (1 caddie = 1 cancha todo el dia)
+app.get('/api/asignaciones_canchas', async (req, res) => {
+    const { fecha } = req.query;
+    try {
+        const asignaciones = await db.prepare(`
+            SELECT a.fecha, u_cancha.nombre as cancha_nombre, u_caddie.nombre as caddie_nombre
+            FROM asignaciones_canchas a
+            JOIN usuarios u_cancha ON a.cancha_id = u_cancha.id
+            JOIN usuarios u_caddie ON a.caddie_id = u_caddie.id
+            WHERE a.fecha = ?
+            ORDER BY 
+                CASE WHEN u_cancha.nombre LIKE 'Cancha %' THEN 0 ELSE 1 END,
+                CAST(REGEXP_REPLACE(u_cancha.nombre, '[^0-9]', '') AS UNSIGNED)
+        `).all(fecha);
+        res.json(asignaciones);
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ error: 'Error al obtener asignaciones' });
     }
 });
 
