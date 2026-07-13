@@ -416,10 +416,9 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
                 for (const hora in serviciosPorHora) {
                     const serviciosHora = serviciosPorHora[hora];
                     
-                    // Registrar canchas ya ocupadas en esta hora por el Excel
-                    const canchasOcupadasEstaHora = new Set(
-                        serviciosHora.map(s => s.cancha_id).filter(id => id != null)
-                    );
+                    // OBVIAR LOS JUGADORES / EXCEL: ignoramos por completo cualquier cancha
+                    // que haya traído el archivo Excel. Empezamos con la lista limpia.
+                    const canchasOcupadasEstaHora = new Set();
 
                     for (const servicio of serviciosHora) {
                         // OBVIAR LOS JUGADORES / EXCEL: Ignoramos si el Excel traia una cancha.
