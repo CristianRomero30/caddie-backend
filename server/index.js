@@ -422,19 +422,12 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
                     );
 
                     for (const servicio of serviciosHora) {
-                        if (servicio.cancha_id) {
-                            // Ya tiene cancha del Excel. Asignarle el caddie que le tocó a ESA cancha hoy.
-                            const caddieAsignado = courtToCaddieMap.get(servicio.cancha_id);
-                            if (caddieAsignado) {
-                                await updateCaddieOnlyStmt.run(caddieAsignado, servicio.id);
-                            }
-                        } else {
-                            // No tiene cancha. Buscar una cancha que tenga caddie hoy y esté LIBRE en esta hora.
-                            const parDisponible = canchaCaddiePairs.find(p => !canchasOcupadasEstaHora.has(p.cancha_id));
-                            if (parDisponible) {
-                                canchasOcupadasEstaHora.add(parDisponible.cancha_id);
-                                await updateBothStmt.run(parDisponible.cancha_id, parDisponible.caddie_id, servicio.id);
-                            }
+                        // OBVIAR LOS JUGADORES / EXCEL: Ignoramos si el Excel traia una cancha.
+                        // Asignamos estrictamente secuencial desde Cancha 1 usando los caddies disponibles.
+                        const parDisponible = canchaCaddiePairs.find(p => !canchasOcupadasEstaHora.has(p.cancha_id));
+                        if (parDisponible) {
+                            canchasOcupadasEstaHora.add(parDisponible.cancha_id);
+                            await updateBothStmt.run(parDisponible.cancha_id, parDisponible.caddie_id, servicio.id);
                         }
                     }
                 }
