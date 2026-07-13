@@ -311,7 +311,9 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
             // 2. Obtener caddies disponibles para Tenis ese día en la mañana (asumiendo inicio 07:00)
             const [y, m, d_part] = fecha.split('-').map(Number);
             const dateObj = new Date(y, m - 1, d_part);
-            let diaJS = dateObj.getDay(); 
+            let diaJS = dateObj.getDay();
+            const festivos = ['2026-07-13', '2026-07-20', '2026-08-07', '2026-08-17', '2026-10-12', '2026-11-02', '2026-11-16', '2026-12-08', '2026-12-25'];
+            if (festivos.includes(fecha)) diaJS = 0; // Tratar festivo como Domingo
             let diaProcesado = diaJS === 0 ? 6 : diaJS - 1;
             
             const esHoy = (fecha === getLocalDate());
@@ -846,9 +848,11 @@ app.post('/api/cronograma/generar', async (req, res) => {
             if (servicios.length === 0) return { count: 0, backups: 0 };
 
             // 2. Determinar día de la semana
-            const [y, m, d_part] = fecha.split('-').map(Number);
-            const dateObj = new Date(y, m - 1, d_part);
-            const diaJS = dateObj.getDay(); 
+            const [y, m_part, d_part] = fecha.split('-').map(Number);
+            const dateObj = new Date(y, m_part - 1, d_part);
+            let diaJS = dateObj.getDay();
+            const festivos = ['2026-07-13', '2026-07-20', '2026-08-07', '2026-08-17', '2026-10-12', '2026-11-02', '2026-11-16', '2026-12-08', '2026-12-25'];
+            if (festivos.includes(fecha)) diaJS = 0;
             const diaProcesado = diaJS === 0 ? 6 : diaJS - 1;
             log(`📆 Fecha=${fecha} | JS Day=${diaJS} | DB Day=${diaProcesado}`);
 
@@ -1446,7 +1450,9 @@ app.get('/api/caddies/disponibles', async (req, res) => {
         // ... (lógica de fecha igual)
         const [y, m, d_part] = fecha.split('-').map(Number);
         const dateObj = new Date(y, m - 1, d_part);
-        let diaJS = dateObj.getDay(); 
+        let diaJS = dateObj.getDay();
+        const festivos = ['2026-07-13', '2026-07-20', '2026-08-07', '2026-08-17', '2026-10-12', '2026-11-02', '2026-11-16', '2026-12-08', '2026-12-25'];
+        if (festivos.includes(fecha)) diaJS = 0;
         let diaProcesado = diaJS === 0 ? 6 : diaJS - 1;
 
         const horaInt = parseInt(hora.split(':')[0]);
