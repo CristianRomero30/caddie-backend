@@ -506,7 +506,8 @@ app.get('/api/servicios', async (req, res) => {
                 u1.nombre as jugador_nombre, 
                 u2.nombre as caddie_nombre,
                 p2.esta_en_club as caddie_en_club,
-                u3.nombre as cancha_nombre
+                u3.nombre as cancha_nombre,
+                s.tee
             FROM servicios s
             JOIN usuarios u1 ON s.socio_id = u1.id
             LEFT JOIN usuarios u2 ON s.caddie_id = u2.id
@@ -1580,9 +1581,14 @@ app.get('/api/stats', async (req, res) => {
         const param = (deporte && deporte !== 'Ambos') ? [deporte] : [];
 
         // 1. Basic Stats (Admin/Coordinador)
-        const serviciosHoy = await db.prepare(`SELECT COUNT(*) as count FROM servicios WHERE fecha_servicio = CURDATE()${filter}`).get(...param).count;
-        const caddiesActivos = await db.prepare(`SELECT COUNT(*) as count FROM usuarios WHERE rol_id = 4 AND estado = 'Activo'${filter}`).get(...param).count;
-        const incidenciasHoy = await db.prepare(`SELECT COUNT(*) as count FROM incidencias WHERE date(fecha_reporte) = CURDATE()`).get().count;
+        const rowServicios = await db.prepare(`SELECT COUNT(*) as count FROM servicios WHERE fecha_servicio = CURDATE()${filter}`).get(...param);
+        const serviciosHoy = rowServicios ? rowServicios.count : 0;
+        
+        const rowCaddies = await db.prepare(`SELECT COUNT(*) as count FROM usuarios WHERE rol_id = 4 AND estado = 'Activo'${filter}`).get(...param);
+        const caddiesActivos = rowCaddies ? rowCaddies.count : 0;
+        
+        const rowIncidencias = await db.prepare(`SELECT COUNT(*) as count FROM incidencias WHERE date(fecha_reporte) = CURDATE()`).get();
+        const incidenciasHoy = rowIncidencias ? rowIncidencias.count : 0;
 
         // 2. Trend (Last 7 Days)
         const tendenciaRaw = await db.prepare(`
@@ -1821,6 +1827,18 @@ app.post('/api/importar-horario', upload.single('file'), async (req, res) => {
         const isTenis = deporte === 'Tenis';
         const colMap = isTenis ? { socio: 9, fecha: 28, hora: 29, id: 0, boliador: 21, elemento: 26 } : { socio: 7, fecha: 22, hora: 23, id: 0 };
         
+        if (!isTenis) {
+            for (let i = 0; i < 4 && i < rows.length; i++) {
+                if (rows[i]) {
+                    const teeIndex = rows[i].findIndex(c => String(c).trim().toUpperCase() === 'TEE');
+                    if (teeIndex !== -1) {
+                        colMap.tee = teeIndex;
+                        break;
+                    }
+                }
+            }
+        }
+        
         log(`🎯 Deporte detectado: ${deporte} | Mapeo: ${JSON.stringify(colMap)}`);
 
         let importedCount = 0;
@@ -1829,9 +1847,9 @@ app.post('/api/importar-horario', upload.single('file'), async (req, res) => {
 
         const insertStmt = db.prepare(`
             INSERT INTO servicios 
-            (socio_id, fecha_servicio, hora_inicio_programada, deporte, estado, external_id, observaciones, tiene_boliador, nombre_boliador, cancha_id)
-            VALUES (?, ?, ?, ?, 'Pendiente', ?, ?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE cancha_id = COALESCE(VALUES(cancha_id), cancha_id)
+            (socio_id, fecha_servicio, hora_inicio_programada, deporte, estado, external_id, observaciones, tiene_boliador, nombre_boliador, cancha_id, tee)
+            VALUES (?, ?, ?, ?, 'Pendiente', ?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE cancha_id = COALESCE(VALUES(cancha_id), cancha_id), tee = COALESCE(VALUES(tee), tee)
         `);
 
         const userCheckStmt = db.prepare('SELECT id FROM usuarios WHERE nombre = ? AND rol_id = 3');
@@ -1926,8 +1944,13 @@ app.post('/api/importar-horario', upload.single('file'), async (req, res) => {
                         }
                     }
 
+                    let teeValue = null;
+                    if (!isTenis && colMap.tee !== undefined && row[colMap.tee]) {
+                        teeValue = String(row[colMap.tee]).trim();
+                    }
+
                     const obs = `Importado de 99apps (ID: ${idReserva})`;
-                    const info = await insertStmt.run(jugadorId, fechaStr, horaStr, deporte, idReserva, obs, tiene_boliador, nombre_boliador, canchaId);
+                    const info = await insertStmt.run(jugadorId, fechaStr, horaStr, deporte, idReserva, obs, tiene_boliador, nombre_boliador, canchaId, teeValue);
                     if (info.changes > 0) {
                         importedCount++;
                         if (importedCount % 10 === 0) log(`🔹 Procesadas ${importedCount} filas...`);
