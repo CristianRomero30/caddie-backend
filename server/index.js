@@ -390,6 +390,12 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
                         if (idx !== -1) {
                             // El caddie fijo está disponible, se asigna y se quita de los restantes
                             caddieSeleccionado = caddiesRestantes.splice(idx, 1)[0];
+                        } else {
+                            // FORZAR ASIGNACIÓN: El caddie es fijo, asignarlo SÍ O SÍ (incluso si está inactivo o es backup)
+                            const caddieForzado = await db.prepare('SELECT u.id, u.nombre, p.esta_en_club FROM usuarios u JOIN perfiles_caddie p ON u.id = p.usuario_id WHERE u.id = ?').get(fijoId);
+                            if (caddieForzado) {
+                                caddieSeleccionado = caddieForzado;
+                            }
                         }
                     }
                 }
