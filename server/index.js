@@ -324,19 +324,19 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
                 JOIN perfiles_caddie p ON u.id = p.usuario_id
                 JOIN horarios_caddie h ON u.id = h.usuario_id
                 WHERE u.rol_id = 4 
-                AND u.estado = 'Activo'
-                AND h.dia_semana = ? 
-                AND h.es_estudio = 0
-                AND h.manana = 1
-                AND (u.deporte = 'Tenis' OR u.deporte = 'Ambos')
-                AND u.id NOT IN (
-                    SELECT caddie_id FROM servicios 
-                    WHERE fecha_servicio = ? AND estado IN ('Pendiente', 'En Juego') AND caddie_id IS NOT NULL
-                    UNION
-                    SELECT caddie_id FROM asignaciones_canchas WHERE fecha = ?
-                    UNION
-                    SELECT caddie_id FROM backups_programados WHERE fecha = ?
-                )
+                  AND u.estado = 'Activo'
+                  AND h.dia_semana = ? 
+                  AND h.es_estudio = 0
+                  AND (h.manana = 1 OR p.turno_backup = 'tarde')
+                  AND (u.deporte = 'Tenis' OR u.deporte = 'Ambos')
+                  AND u.id NOT IN (
+                      SELECT caddie_id FROM servicios 
+                      WHERE fecha_servicio = ? AND estado IN ('Pendiente', 'En Juego') AND caddie_id IS NOT NULL
+                      UNION
+                      SELECT caddie_id FROM asignaciones_canchas WHERE fecha = ?
+                      UNION
+                      SELECT caddie_id FROM backups_programados WHERE fecha = ? AND turno = 'mañana'
+                  )
             `).all(diaProcesado, fecha, fecha, fecha);
 
             // Ordenar equitativamente
@@ -356,24 +356,64 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
 
             let asignados = 0;
             const asignaciones = [];
-
-            const maxAsignaciones = Math.min(canchas.length, caddiesDisponibles.length);
             const canchaCaddiePairs = [];
 
-            for (let i = 0; i < maxAsignaciones; i++) {
-                const cancha = canchas[i];
-                const caddie = caddiesDisponibles[i];
+            // MAPA DE CADDIES FIJOS PARA FIN DE SEMANA
+            const caddiesFijosCanchas = {
+                1: 75,
+                2: 150,
+                3: 81,
+                4: 90,
+                5: 104,
+                13: 131,
+                14: 175,
+                15: 158,
+                16: 99,
+                17: 183,
+                18: 87
+            };
 
-                await insertStmt.run(fecha, cancha.id, caddie.id);
-                asignados++;
-                asignaciones.push({ 
-                    id: caddie.id, 
-                    nombre: caddie.nombre, 
-                    cancha: cancha.nombre,
-                    hora_inicio_programada: '07:00', 
-                    esta_en_club: caddie.esta_en_club 
-                });
-                canchaCaddiePairs.push({ cancha_id: cancha.id, caddie_id: caddie.id });
+            let caddiesRestantes = [...caddiesDisponibles];
+
+            for (const cancha of canchas) {
+                let caddieSeleccionado = null;
+                
+                // Verificar si la cancha tiene un caddie fijo asignado
+                const numMatch = cancha.nombre.match(/\d+/);
+                const isMini = cancha.nombre.toLowerCase().includes('mini');
+                
+                if (numMatch && !isMini) {
+                    const numCancha = parseInt(numMatch[0], 10);
+                    if (caddiesFijosCanchas[numCancha]) {
+                        const fijoId = caddiesFijosCanchas[numCancha];
+                        const idx = caddiesRestantes.findIndex(c => c.id === fijoId);
+                        if (idx !== -1) {
+                            // El caddie fijo está disponible, se asigna y se quita de los restantes
+                            caddieSeleccionado = caddiesRestantes.splice(idx, 1)[0];
+                        }
+                    }
+                }
+
+                // Si no hubo caddie fijo (o no estaba disponible), usar el siguiente de la lista
+                if (!caddieSeleccionado && caddiesRestantes.length > 0) {
+                    caddieSeleccionado = caddiesRestantes.shift();
+                }
+
+                if (caddieSeleccionado) {
+                    await insertStmt.run(fecha, cancha.id, caddieSeleccionado.id);
+                    asignados++;
+                    asignaciones.push({ 
+                        id: caddieSeleccionado.id, 
+                        nombre: caddieSeleccionado.nombre, 
+                        cancha: cancha.nombre,
+                        hora_inicio_programada: '07:00', 
+                        esta_en_club: caddieSeleccionado.esta_en_club 
+                    });
+                    canchaCaddiePairs.push({ cancha_id: cancha.id, caddie_id: caddieSeleccionado.id });
+                } else {
+                    // Ya no hay más caddies disponibles para repartir
+                    break;
+                }
             }
 
             // 4. Distribuir los turnos (servicios) importados - asignar caddies
@@ -931,8 +971,8 @@ app.post('/api/cronograma/generar', async (req, res) => {
                         continue;
                     }
 
-                    // Los backups de la mañana de tenis no pueden ser asignados a turnos de las 6:00 AM (hour < 7)
-                    if (hour < 7 && morningTenisBackups.has(c.id)) {
+                    // Los backups de la mañana de tenis NO pueden ser asignados a turnos a partir de la 1:00 PM (13:00)
+                    if (hour >= 13 && morningTenisBackups.has(c.id)) {
                         continue;
                     }
 
