@@ -392,15 +392,20 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
                     const fijoId = isMini ? caddiesFijosMini[numCancha] : caddiesFijosCanchas[numCancha];
                     
                     if (fijoId) {
-                        const idx = caddiesRestantes.findIndex(c => c.id === fijoId);
-                        if (idx !== -1) {
-                            // El caddie fijo está disponible, se asigna y se quita de los restantes
-                            caddieSeleccionado = caddiesRestantes.splice(idx, 1)[0];
-                        } else {
-                            // FORZAR ASIGNACIÓN: El caddie es fijo, asignarlo SÍ O SÍ
-                            const caddieForzado = await db.prepare('SELECT u.id, u.nombre, p.esta_en_club FROM usuarios u JOIN perfiles_caddie p ON u.id = p.usuario_id WHERE u.id = ?').get(fijoId);
-                            if (caddieForzado) {
-                                caddieSeleccionado = caddieForzado;
+                        // Verificar si este caddie fijo está como backup de mañana. Si lo está, no lo forzamos.
+                        const isBackupManana = await db.prepare("SELECT 1 FROM backups_programados WHERE fecha = ? AND turno = 'mañana' AND caddie_id = ?").get(fecha, fijoId);
+                        
+                        if (!isBackupManana) {
+                            const idx = caddiesRestantes.findIndex(c => c.id === fijoId);
+                            if (idx !== -1) {
+                                // El caddie fijo está disponible, se asigna y se quita de los restantes
+                                caddieSeleccionado = caddiesRestantes.splice(idx, 1)[0];
+                            } else {
+                                // FORZAR ASIGNACIÓN: El caddie es fijo, asignarlo SÍ O SÍ
+                                const caddieForzado = await db.prepare('SELECT u.id, u.nombre, p.esta_en_club FROM usuarios u JOIN perfiles_caddie p ON u.id = p.usuario_id WHERE u.id = ?').get(fijoId);
+                                if (caddieForzado) {
+                                    caddieSeleccionado = caddieForzado;
+                                }
                             }
                         }
                     }
@@ -413,9 +418,6 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
                 
                 if (caddieSeleccionado) {
                     await insertStmt.run(fecha, cancha.id, caddieSeleccionado.id);
-                    
-                    // Eliminar de backups_programados ya que ahora tiene cancha fija
-                    await db.prepare('DELETE FROM backups_programados WHERE fecha = ? AND caddie_id = ?').run(fecha, caddieSeleccionado.id);
                     
                     asignados++;
                     asignaciones.push({ 
