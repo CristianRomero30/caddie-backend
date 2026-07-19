@@ -388,6 +388,10 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
                 const numMatch = cancha.nombre.match(/\d+/);
                 const isMini = cancha.nombre.toLowerCase().includes('mini');
                 
+                if (isMini && numMatch && parseInt(numMatch[0], 10) === 3) {
+                    continue; // Requerimiento: No asignar caddie a Mini Tenis 3 por defecto
+                }
+                
                 if (numMatch) {
                     const numCancha = parseInt(numMatch[0], 10);
                     const fijoId = isMini ? caddiesFijosMini[numCancha] : caddiesFijosCanchas[numCancha];
