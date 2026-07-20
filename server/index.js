@@ -1004,6 +1004,64 @@ app.delete('/api/servicios/:id', async (req, res) => {
 
 // --- MOTOR DE ASIGNACIÓN AUTOMÁTICA Y CRONOGRAMA ---
 
+app.get('/api/cronograma/stats', async (req, res) => {
+    const { fecha } = req.query;
+    if (!fecha) return res.status(400).json({ success: false, message: 'La fecha es obligatoria' });
+
+    try {
+        const [y, m, d_part] = fecha.split('-').map(Number);
+        const dateObj = new Date(y, m - 1, d_part);
+        let diaJS = dateObj.getDay();
+        const festivos = ['2026-07-13', '2026-07-20', '2026-08-07', '2026-08-17', '2026-10-12', '2026-11-02', '2026-11-16', '2026-12-08', '2026-12-25'];
+        if (festivos.includes(fecha)) diaJS = 0;
+        let diaProcesado = diaJS === 0 ? 6 : diaJS - 1;
+
+        // 1. Activos
+        const activosGolf = await db.prepare("SELECT COUNT(*) as count FROM usuarios WHERE rol_id = 4 AND estado = 'Activo' AND (deporte = 'Golf' OR deporte = 'Ambos')").get();
+        const activosTenis = await db.prepare("SELECT COUNT(*) as count FROM usuarios WHERE rol_id = 4 AND estado = 'Activo' AND (deporte = 'Tenis' OR deporte = 'Ambos')").get();
+
+        // 2. Disponibles Hoy
+        const disponiblesGolf = await db.prepare(`
+            SELECT COUNT(DISTINCT u.id) as count 
+            FROM usuarios u 
+            JOIN horarios_caddie h ON u.id = h.usuario_id 
+            WHERE u.rol_id = 4 AND u.estado = 'Activo' AND (u.deporte = 'Golf' OR u.deporte = 'Ambos') 
+            AND h.dia_semana = ? AND (h.manana = 1 OR h.tarde = 1)
+        `).get(diaProcesado);
+
+        const disponiblesTenis = await db.prepare(`
+            SELECT COUNT(DISTINCT u.id) as count 
+            FROM usuarios u 
+            JOIN horarios_caddie h ON u.id = h.usuario_id 
+            WHERE u.rol_id = 4 AND u.estado = 'Activo' AND (u.deporte = 'Tenis' OR u.deporte = 'Ambos') 
+            AND h.dia_semana = ? AND (h.manana = 1 OR h.tarde = 1)
+        `).get(diaProcesado);
+
+        // 3. Turnos Creados
+        const turnosGolf = await db.prepare("SELECT COUNT(*) as count FROM servicios WHERE fecha_servicio = ? AND deporte = 'Golf' AND estado != 'Cancelado' AND estado != 'Completado'").get(fecha);
+        const turnosTenis = await db.prepare("SELECT COUNT(*) as count FROM servicios WHERE fecha_servicio = ? AND deporte = 'Tenis' AND estado != 'Cancelado' AND estado != 'Completado'").get(fecha);
+
+        res.json({
+            success: true,
+            golf: {
+                activos: activosGolf.count,
+                descansos: activosGolf.count - disponiblesGolf.count,
+                disponibles: disponiblesGolf.count,
+                turnos: turnosGolf.count
+            },
+            tenis: {
+                activos: activosTenis.count,
+                descansos: activosTenis.count - disponiblesTenis.count,
+                disponibles: disponiblesTenis.count,
+                turnos: turnosTenis.count
+            }
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Error calculando stats' });
+    }
+});
+
 app.post('/api/cronograma/generar', async (req, res) => {
     const { fecha, deporte } = req.body;
     if (!fecha) return res.status(400).json({ success: false, message: 'Fecha requerida' });
