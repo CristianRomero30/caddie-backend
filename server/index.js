@@ -809,12 +809,17 @@ app.patch('/api/servicios/:id/asignar', async (req, res) => {
     const { id } = req.params;
     const { caddie_id, cancha_id } = req.body;
     try {
-        const [servicio] = await db.prepare('SELECT fecha_servicio, hora_inicio_programada, deporte FROM servicios WHERE id = ?').all(id);
+        const [servicio] = await db.prepare('SELECT fecha_servicio, hora_inicio_programada, deporte, cancha_id FROM servicios WHERE id = ?').all(id);
         if (!servicio) throw new Error('Servicio no encontrado');
 
+        const [y, m, d_part] = servicio.fecha_servicio.split('-').map(Number);
+        const dateObj = new Date(y, m - 1, d_part);
+        const diaJS = dateObj.getDay();
+        const festivos = ['2026-07-13', '2026-07-20', '2026-08-07', '2026-08-17', '2026-10-12', '2026-11-02', '2026-11-16', '2026-12-08', '2026-12-25'];
+        const isWeekendTennis = servicio.deporte === 'Tenis' && (diaJS === 0 || diaJS === 6 || festivos.includes(servicio.fecha_servicio));
+
         if (cancha_id && caddie_id) {
-            // Asignación de ambos (ej. Tenis entre semana)
-            // Validar que la cancha no esté ocupada en ese horario
+            // Asignación de ambos
             const [ocupado] = await db.prepare(`
                 SELECT id FROM servicios 
                 WHERE fecha_servicio = ? 
@@ -828,19 +833,36 @@ app.patch('/api/servicios/:id/asignar', async (req, res) => {
                 throw new Error('La cancha seleccionada ya está ocupada en este horario.');
             }
             
-            await db.prepare("UPDATE servicios SET caddie_id = ?, cancha_id = ?, estado_confirmacion = 'Pendiente', reporto_llegada = 0, es_puntual = NULL, ubicacion_verificada = 0 WHERE id = ?")
-                .run(caddie_id, cancha_id, id);
+            if (isWeekendTennis) {
+                await db.prepare("UPDATE servicios SET caddie_id = ?, estado_confirmacion = 'Pendiente', reporto_llegada = 0, es_puntual = NULL, ubicacion_verificada = 0 WHERE fecha_servicio = ? AND cancha_id = ? AND deporte = 'Tenis'").run(caddie_id, servicio.fecha_servicio, cancha_id);
+                const hasAsignacion = await db.prepare("SELECT caddie_id FROM asignaciones_canchas WHERE fecha = ? AND cancha_id = ?").get(servicio.fecha_servicio, cancha_id);
+                if (hasAsignacion) {
+                    await db.prepare("UPDATE asignaciones_canchas SET caddie_id = ? WHERE fecha = ? AND cancha_id = ?").run(caddie_id, servicio.fecha_servicio, cancha_id);
+                } else {
+                    await db.prepare("INSERT INTO asignaciones_canchas (fecha, cancha_id, caddie_id) VALUES (?, ?, ?)").run(servicio.fecha_servicio, cancha_id, caddie_id);
+                }
+                await db.prepare("UPDATE servicios SET cancha_id = ? WHERE id = ?").run(cancha_id, id);
+            } else {
+                await db.prepare("UPDATE servicios SET caddie_id = ?, cancha_id = ?, estado_confirmacion = 'Pendiente', reporto_llegada = 0, es_puntual = NULL, ubicacion_verificada = 0 WHERE id = ?").run(caddie_id, cancha_id, id);
+            }
         } else if (cancha_id) {
-            // Solo Cancha (Flujo Tenis Finde original)
+            // Solo Cancha
             const [asignacion] = await db.prepare('SELECT caddie_id FROM asignaciones_canchas WHERE fecha = ? AND cancha_id = ?').all(servicio.fecha_servicio, cancha_id);
             if (!asignacion) throw new Error('La cancha seleccionada no tiene un caddie asignado para este día.');
             
-            await db.prepare("UPDATE servicios SET caddie_id = ?, cancha_id = ?, estado_confirmacion = 'Pendiente', reporto_llegada = 0, es_puntual = NULL, ubicacion_verificada = 0 WHERE id = ?")
-                .run(asignacion.caddie_id, cancha_id, id);
+            await db.prepare("UPDATE servicios SET caddie_id = ?, cancha_id = ?, estado_confirmacion = 'Pendiente', reporto_llegada = 0, es_puntual = NULL, ubicacion_verificada = 0 WHERE id = ?").run(asignacion.caddie_id, cancha_id, id);
         } else if (caddie_id) {
-            // Solo Caddie, pero MANTENEMOS la cancha que ya tenía (requerimiento del usuario)
-            await db.prepare("UPDATE servicios SET caddie_id = ?, estado_confirmacion = 'Pendiente', reporto_llegada = 0, es_puntual = NULL, ubicacion_verificada = 0 WHERE id = ?")
-              .run(caddie_id, id);
+            if (isWeekendTennis && servicio.cancha_id) {
+                await db.prepare("UPDATE servicios SET caddie_id = ?, estado_confirmacion = 'Pendiente', reporto_llegada = 0, es_puntual = NULL, ubicacion_verificada = 0 WHERE fecha_servicio = ? AND cancha_id = ? AND deporte = 'Tenis'").run(caddie_id, servicio.fecha_servicio, servicio.cancha_id);
+                const hasAsignacion = await db.prepare("SELECT caddie_id FROM asignaciones_canchas WHERE fecha = ? AND cancha_id = ?").get(servicio.fecha_servicio, servicio.cancha_id);
+                if (hasAsignacion) {
+                    await db.prepare("UPDATE asignaciones_canchas SET caddie_id = ? WHERE fecha = ? AND cancha_id = ?").run(caddie_id, servicio.fecha_servicio, servicio.cancha_id);
+                } else {
+                    await db.prepare("INSERT INTO asignaciones_canchas (fecha, cancha_id, caddie_id) VALUES (?, ?, ?)").run(servicio.fecha_servicio, servicio.cancha_id, caddie_id);
+                }
+            } else {
+                await db.prepare("UPDATE servicios SET caddie_id = ?, estado_confirmacion = 'Pendiente', reporto_llegada = 0, es_puntual = NULL, ubicacion_verificada = 0 WHERE id = ?").run(caddie_id, id);
+            }
         } else {
             throw new Error('Debe proporcionar un caddie o una cancha.');
         }
