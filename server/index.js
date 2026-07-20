@@ -809,8 +809,35 @@ app.patch('/api/servicios/:id/hora', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
- 
-// Reasignar Caddie a un turno existente
+  // Reasignar una Cancha Completa (Tenis Finde)
+  app.post('/api/canchas/asignar', async (req, res) => {
+      const { cancha_id, caddie_id, fecha } = req.body;
+      if (!cancha_id || !caddie_id || !fecha) {
+          return res.status(400).json({ success: false, message: 'Faltan parámetros requeridos' });
+      }
+      try {
+          // 1. Actualizar asignaciones_canchas
+          await db.prepare(`
+              INSERT INTO asignaciones_canchas (fecha, cancha_id, caddie_id) 
+              VALUES (?, ?, ?) 
+              ON DUPLICATE KEY UPDATE caddie_id = VALUES(caddie_id)
+          `).run(fecha, cancha_id, caddie_id);
+
+          // 2. Sincronizar todos los servicios de tenis de ese día para esa cancha
+          await db.prepare(`
+              UPDATE servicios 
+              SET caddie_id = ? 
+              WHERE fecha_servicio = ? AND deporte = 'Tenis' AND cancha_id = ?
+          `).run(caddie_id, fecha, cancha_id);
+
+          res.json({ success: true, message: 'Cancha reasignada exitosamente' });
+      } catch (error) {
+          console.error(error);
+          res.status(500).json({ success: false, message: 'Error reasignando cancha: ' + error.message });
+      }
+  });
+
+  // Reasignar Caddie a un turno existente
 app.patch('/api/servicios/:id/asignar', async (req, res) => {
     const { id } = req.params;
     const { caddie_id, cancha_id } = req.body;
