@@ -495,6 +495,13 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
                         }
                     }
                 }
+
+                // FORZAR SINCRONIZACIÓN: Cualquier partido (antiguo o nuevo) en estas canchas 
+                // debe tener el caddie oficial del día asignado, para que el PDF y la UI coincidan 100%.
+                const forceSyncStmt = await db.prepare("UPDATE servicios SET caddie_id = ? WHERE fecha_servicio = ? AND deporte = 'Tenis' AND cancha_id = ?");
+                for (const par of canchaCaddiePairs) {
+                    await forceSyncStmt.run(par.caddie_id, fecha, par.cancha_id);
+                }
             }
 
             return { asignados, asignaciones };
