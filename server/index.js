@@ -1518,7 +1518,6 @@ app.get('/api/caddies/disponibles', async (req, res) => {
         const festivos = ['2026-07-13', '2026-07-20', '2026-08-07', '2026-08-17', '2026-10-12', '2026-11-02', '2026-11-16', '2026-12-08', '2026-12-25'];
         if (festivos.includes(fecha)) diaJS = 0;
         let diaProcesado = diaJS === 0 ? 6 : diaJS - 1;
-
         const horaInt = parseInt(hora.split(':')[0]);
         const esManana = horaInt < 12 ? 1 : 0;
         const esTarde = horaInt >= 12 ? 1 : 0;
@@ -1527,7 +1526,8 @@ app.get('/api/caddies/disponibles', async (req, res) => {
         const orderBy = esHoy ? 'p.esta_en_club DESC, p.horas_acumuladas ASC' : 'p.horas_acumuladas ASC';
 
         let query = `
-            SELECT u.id, u.nombre, p.horas_acumuladas, p.esta_en_club
+            SELECT u.id, u.nombre, p.horas_acumuladas, p.esta_en_club,
+            (SELECT COUNT(*) FROM backups_programados bp WHERE bp.caddie_id = u.id AND bp.fecha = ?) as isBackup
             FROM usuarios u
             JOIN perfiles_caddie p ON u.id = p.usuario_id
             JOIN horarios_caddie h ON u.id = h.usuario_id
@@ -1538,7 +1538,7 @@ app.get('/api/caddies/disponibles', async (req, res) => {
             AND ( ( ? = 1 AND h.manana = 1 ) OR ( ? = 1 AND h.tarde = 1 ) )
         `;
         
-        const params = [diaProcesado, esManana, esTarde];
+        const params = [fecha, diaProcesado, esManana, esTarde];
         
         if (deporte && deporte !== 'Ambos') {
             query += " AND (u.deporte = ? OR u.deporte = 'Ambos')";
