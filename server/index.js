@@ -604,11 +604,6 @@ app.get('/api/servicios', async (req, res) => {
             query += ' AND s.fecha_servicio = ?';
             params.push(req.query.fecha);
         }
-        if (search) {
-            query += ` AND (u1.nombre LIKE ? OR s.nombre_jugador_temp LIKE ?)`;
-            params.push(`%${search}%`, `%${search}%`);
-        }
-
         query += ' ORDER BY s.fecha_servicio DESC, s.hora_inicio_programada ASC, u3.nombre ASC LIMIT 1000';
         
         const servicios = await db.prepare(query).all(...params);
