@@ -672,10 +672,13 @@ app.get('/api/canchas/asignaciones', async (req, res) => {
 
     try {
         const query = `
-            SELECT c.id as cancha_id, ? as fecha, c.nombre as cancha_nombre, cad.nombre as caddie_nombre
+            SELECT c.id as cancha_id, ? as fecha, c.nombre as cancha_nombre, 
+                   cad.nombre as caddie_nombre, cad.id as caddie_id,
+                   ac.estado, ac.caddie_tarde_id, cad_tarde.nombre as caddie_tarde_nombre
             FROM usuarios c
             LEFT JOIN asignaciones_canchas ac ON c.id = ac.cancha_id AND ac.fecha = ?
             LEFT JOIN usuarios cad ON ac.caddie_id = cad.id
+            LEFT JOIN usuarios cad_tarde ON ac.caddie_tarde_id = cad_tarde.id
             WHERE (c.nombre LIKE 'Cancha %' OR c.nombre LIKE 'Mini Tenis %') AND c.rol_id = 3 AND c.estado = 'Activo'
         `;
         const asignaciones = await db.prepare(query).all(fecha, fecha);
@@ -696,6 +699,49 @@ app.get('/api/canchas/asignaciones', async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Error recuperando asignaciones' });
+    }
+});
+
+app.patch('/api/canchas/asignaciones/estado', async (req, res) => {
+    const { fecha, cancha_id, estado } = req.body;
+    if (!fecha || !cancha_id || !estado) return res.status(400).json({ success: false, message: 'Faltan parámetros' });
+    try {
+        await db.prepare(`
+            UPDATE asignaciones_canchas 
+            SET estado = ? 
+            WHERE fecha = ? AND cancha_id = ?
+        `).run(estado, fecha, cancha_id);
+        res.json({ success: true });
+    } catch(err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.patch('/api/canchas/asignaciones/tarde', async (req, res) => {
+    const { fecha, cancha_id, caddie_tarde_id } = req.body;
+    if (!fecha || !cancha_id || !caddie_tarde_id) return res.status(400).json({ success: false, message: 'Faltan parámetros' });
+    
+    try {
+        // 1. Update asignaciones_canchas
+        await db.prepare(`
+            UPDATE asignaciones_canchas 
+            SET caddie_tarde_id = ? 
+            WHERE fecha = ? AND cancha_id = ?
+        `).run(caddie_tarde_id, fecha, cancha_id);
+
+        // 2. Cascade update servicios >= 13:00 for that date and court
+        // This ensures the afternoon backup takes over matches starting 1:00 PM or later
+        await db.prepare(`
+            UPDATE servicios 
+            SET caddie_id = ? 
+            WHERE fecha_servicio = ? AND deporte = 'Tenis' AND cancha_id = ? AND hora_inicio_programada >= '13:00:00'
+        `).run(caddie_tarde_id, fecha, cancha_id);
+        
+        res.json({ success: true });
+    } catch(err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: err.message });
     }
 });
 
@@ -811,7 +857,7 @@ app.patch('/api/servicios/:id/hora', async (req, res) => {
 });
   // Reasignar una Cancha Completa (Tenis Finde)
   app.post('/api/canchas/asignar', async (req, res) => {
-      const { cancha_id, caddie_id, fecha } = req.body;
+      const { cancha_id, caddie_id, fecha, prev_caddie_id, prev_caddie_backup_action } = req.body;
       if (!cancha_id || !caddie_id || !fecha) {
           return res.status(400).json({ success: false, message: 'Faltan parámetros requeridos' });
       }
@@ -822,18 +868,41 @@ app.patch('/api/servicios/:id/hora', async (req, res) => {
               VALUES (?, ?, ?) 
               ON DUPLICATE KEY UPDATE caddie_id = VALUES(caddie_id)
           `).run(fecha, cancha_id, caddie_id);
-
-          // 2. Sincronizar todos los servicios de tenis de ese día para esa cancha
+  
+          // 2. Sincronizar todos los servicios de tenis de ese día para esa cancha (turno mañana)
+          // Aquellos programados antes de la 1pm o sin hora
           await db.prepare(`
               UPDATE servicios 
               SET caddie_id = ? 
-              WHERE fecha_servicio = ? AND deporte = 'Tenis' AND cancha_id = ?
+              WHERE fecha_servicio = ? AND deporte = 'Tenis' AND cancha_id = ? AND (hora_inicio_programada < '13:00:00' OR hora_inicio_programada IS NULL)
           `).run(caddie_id, fecha, cancha_id);
 
+          // 3. Manejo de backup caddie
+          if (prev_caddie_id && prev_caddie_backup_action) {
+              const d = new Date();
+              d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+              const hoyStr = d.toISOString().split('T')[0];
+              
+              const turnoNormalizado = prev_caddie_backup_action === 'Mañana' ? 'Mañana' : 'Tarde';
+              
+              if (fecha === hoyStr) {
+                  await db.prepare(`
+                      UPDATE perfiles_caddie 
+                      SET esta_en_club = 1, turno_backup = ?, deporte_backup = 'Tenis', fecha_entrada_club = CURRENT_TIMESTAMP
+                      WHERE usuario_id = ?
+                  `).run(turnoNormalizado, prev_caddie_id);
+              } else {
+                  await db.prepare(`
+                      INSERT INTO backups_programados (caddie_id, fecha, turno, deporte)
+                      VALUES (?, ?, ?, 'Tenis')
+                      ON DUPLICATE KEY UPDATE turno = VALUES(turno)
+                  `).run(prev_caddie_id, fecha, turnoNormalizado);
+              }
+          }
+  
           res.json({ success: true, message: 'Cancha reasignada exitosamente' });
       } catch (error) {
-          console.error(error);
-          res.status(500).json({ success: false, message: 'Error reasignando cancha: ' + error.message });
+          res.status(500).json({ success: false, message: error.message });
       }
   });
 
