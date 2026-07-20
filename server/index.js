@@ -672,13 +672,13 @@ app.get('/api/canchas/asignaciones', async (req, res) => {
 
     try {
         const query = `
-            SELECT c.nombre as cancha_nombre, cad.nombre as caddie_nombre
+            SELECT c.id as cancha_id, ? as fecha, c.nombre as cancha_nombre, cad.nombre as caddie_nombre
             FROM usuarios c
             LEFT JOIN asignaciones_canchas ac ON c.id = ac.cancha_id AND ac.fecha = ?
             LEFT JOIN usuarios cad ON ac.caddie_id = cad.id
             WHERE (c.nombre LIKE 'Cancha %' OR c.nombre LIKE 'Mini Tenis %') AND c.rol_id = 3 AND c.estado = 'Activo'
         `;
-        const asignaciones = await db.prepare(query).all(fecha);
+        const asignaciones = await db.prepare(query).all(fecha, fecha);
         
         asignaciones.sort((a, b) => {
             const isMiniA = a.cancha_nombre.toLowerCase().includes('mini');
