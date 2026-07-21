@@ -335,10 +335,8 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
                       WHERE fecha_servicio = ? AND estado IN ('Pendiente', 'En Juego') AND caddie_id IS NOT NULL
                       UNION
                       SELECT caddie_id FROM asignaciones_canchas WHERE fecha = ?
-                      UNION
-                      SELECT caddie_id FROM backups_programados WHERE fecha = ? AND turno = 'mañana'
                   )
-            `).all(diaProcesado, fecha, fecha, fecha);
+            `).all(diaProcesado, fecha, fecha);
 
             // Ordenar equitativamente
             caddiesDisponibles.sort((a, b) => {
@@ -437,6 +435,14 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
                     // Ya no hay más caddies disponibles para repartir
                     break;
                 }
+            }
+
+            // LIMPIEZA DE BACKUPS (ROBO INTELIGENTE)
+            // Cualquier caddie que haya sido robado de la lista de backups para asignarlo a una cancha, se elimina de los backups.
+            if (canchaCaddiePairs.length > 0) {
+                const assignedCaddieIds = canchaCaddiePairs.map(p => p.caddie_id);
+                const placeholders = assignedCaddieIds.map(() => '?').join(',');
+                await db.prepare(`DELETE FROM backups_programados WHERE fecha = ? AND caddie_id IN (${placeholders})`).run(fecha, ...assignedCaddieIds);
             }
 
             // 4. Distribuir los turnos (servicios) importados - asignar caddies
