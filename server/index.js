@@ -1573,6 +1573,16 @@ app.post('/api/backups', async (req, res) => {
     }
 });
 
+app.post('/api/backups/manual', async (req, res) => {
+    const { fecha, deporte, turno, caddie_id } = req.body;
+    try {
+        await db.prepare(`INSERT INTO backups_programados (fecha, deporte, turno, caddie_id) VALUES (?, ?, ?, ?)`).run(fecha, deporte || 'Tenis', turno, caddie_id);
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
 app.put('/api/backups/:id', async (req, res) => {
     const { caddie_id } = req.body;
     try {
