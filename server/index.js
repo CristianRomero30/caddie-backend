@@ -328,7 +328,7 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
                   AND u.estado = 'Activo'
                   AND h.dia_semana = ? 
                   AND h.es_estudio = 0
-                  AND (h.manana = 1 OR p.turno_backup = 'tarde')
+                  AND (h.manana = 1 OR h.tarde = 1 OR p.turno_backup = 'tarde')
                   AND (u.deporte = 'Tenis' OR u.deporte = 'Ambos')
                   AND u.id NOT IN (
                       SELECT caddie_id FROM servicios 
