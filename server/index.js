@@ -1113,7 +1113,7 @@ app.post('/api/cronograma/generar', async (req, res) => {
             const orderBy = esHoy ? 'p.esta_en_club DESC, p.horas_acumuladas ASC' : 'p.horas_acumuladas ASC';
 
             const caddiesDisponibles = await db.prepare(`
-                SELECT u.id, u.nombre, u.deporte, p.horas_acumuladas, h.manana, h.tarde, p.esta_en_club
+                SELECT u.id, u.nombre, u.deporte, p.horas_acumuladas, h.manana, h.tarde, h.horas_disponibles, p.esta_en_club
                 FROM usuarios u
                 JOIN perfiles_caddie p ON u.id = p.usuario_id
                 JOIN horarios_caddie h ON u.id = h.usuario_id
@@ -1208,7 +1208,18 @@ app.post('/api/cronograma/generar', async (req, res) => {
 
                     if (tieneNovedad) continue;
 
-                    const cumpleTurno = esManana ? c.manana === 1 : c.tarde === 1;
+                    let cumpleTurno = false;
+                    try {
+                        const parsedHoras = c.horas_disponibles ? (typeof c.horas_disponibles === 'string' ? JSON.parse(c.horas_disponibles) : c.horas_disponibles) : null;
+                        if (parsedHoras && Object.keys(parsedHoras).length > 0) {
+                            const exactHourKey = `${hour}:00`;
+                            cumpleTurno = !!parsedHoras[exactHourKey];
+                        } else {
+                            cumpleTurno = false; 
+                        }
+                    } catch (e) {
+                        cumpleTurno = false;
+                    }
                     if (!cumpleTurno) continue;
 
                     // Si es válido, verificamos equidad del día
