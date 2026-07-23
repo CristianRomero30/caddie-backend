@@ -1211,9 +1211,8 @@ app.post('/api/cronograma/generar', async (req, res) => {
                     let cumpleTurno = false;
                     try {
                         const parsedHoras = c.horas_disponibles ? (typeof c.horas_disponibles === 'string' ? JSON.parse(c.horas_disponibles) : c.horas_disponibles) : null;
-                        if (parsedHoras && Object.keys(parsedHoras).length > 0) {
-                            const exactHourKey = `${hour}:00`;
-                            cumpleTurno = !!parsedHoras[exactHourKey];
+                        if (Array.isArray(parsedHoras) && parsedHoras.length > 0) {
+                            cumpleTurno = parsedHoras.includes(hour) || parsedHoras.includes(hour.toString());
                         } else {
                             cumpleTurno = false; 
                         }
