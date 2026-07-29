@@ -2323,6 +2323,40 @@ const ejecutarMantenimiento = async () => {
 ejecutarMantenimiento();
 setInterval(ejecutarMantenimiento, 1000 * 60 * 60);
 
+// --- AUTO-INICIO DE TURNOS ---
+function ejecutarIniciosAutomaticos() {
+    try {
+        const hoy = getLocalDate();
+        const ahora = new Date().toLocaleTimeString('en-US', {hour12: false, hour: '2-digit', minute:'2-digit'});
+        
+        // Find services for today, that are Pendiente, have a caddie, and hora_inicio_programada <= ahora
+        const serviciosParaIniciar = db.prepare(`
+            SELECT id FROM servicios 
+            WHERE fecha_servicio = ? 
+            AND estado = 'Pendiente' 
+            AND caddie_id IS NOT NULL 
+            AND hora_inicio_programada <= ?
+            AND hora_inicio_programada != ''
+            AND hora_inicio_programada IS NOT NULL
+        `).all(hoy, ahora);
+
+        if (serviciosParaIniciar.length > 0) {
+            const updateStmt = db.prepare("UPDATE servicios SET estado = 'En Juego', hora_inicio_real = COALESCE(hora_inicio_real, ?) WHERE id = ?");
+            db.transaction((servicios) => {
+                for (const s of servicios) {
+                    updateStmt.run(ahora, s.id);
+                }
+            })(serviciosParaIniciar);
+            console.log(`✅ [AUTO-INICIO] Se iniciaron automáticamente ${serviciosParaIniciar.length} turnos.`);
+        }
+    } catch (e) {
+        console.error('Error en inicio automático de turnos:', e);
+    }
+}
+setInterval(ejecutarIniciosAutomaticos, 1000 * 60);
+setTimeout(ejecutarIniciosAutomaticos, 5000); // Check shortly after startup
+
+
 // --- CATCH ALL para el frontend ---
 // Ahora el frontend está en Hostinger, así que el backend solo responde APIs
 app.use((req, res, next) => {
