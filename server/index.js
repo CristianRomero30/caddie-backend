@@ -161,19 +161,43 @@ app.use(async (req, res, next) => {
             res.on('finish', async () => {
                 if (res.statusCode >= 200 && res.statusCode < 300) {
                     let accion = `${req.method} ${req.path}`;
-                    if (req.path === '/api/servicios' && req.method === 'POST') accion = 'Creó un nuevo turno/servicio';
-                    else if (req.path.match(/^\/api\/servicios\/\d+$/) && req.method === 'DELETE') accion = 'Eliminó un turno/servicio';
-                    else if (req.path.match(/^\/api\/servicios\/\d+\/estado$/) && req.method === 'PATCH') accion = 'Cambió el estado de un turno';
-                    else if (req.path.match(/^\/api\/servicios\/\d+\/hora$/) && req.method === 'PUT') accion = 'Cambió la hora de un turno';
-                    else if (req.path.match(/^\/api\/servicios\/\d+\/confirmar$/)) accion = 'Confirmó/Rechazó o Reasignó un turno';
-                    else if (req.path === '/api/caddies' && req.method === 'POST') accion = 'Registró un nuevo Caddie';
-                    else if (req.path.match(/^\/api\/caddies\/\d+$/) && req.method === 'PUT') accion = 'Editó los datos de un Caddie';
-                    else if (req.path.match(/^\/api\/usuarios\/\d+$/) && req.method === 'PUT') accion = 'Editó un Usuario / Cambió Estado';
-                    else if (req.path.match(/^\/api\/caddies\/\d+\/estado$/) && req.method === 'PATCH') accion = 'Cambió el estado (Activo/Inactivo/Retirado) de un Caddie';
-                    else if (req.path.match(/^\/api\/caddies\/\d+$/) && req.method === 'DELETE') accion = 'Eliminó un Caddie';
-                    else if (req.path === '/api/perfil/estado-club' && req.method === 'POST') accion = 'Marcó Entrada/Salida de Caddie en el Club';
-                    else if (req.path === '/api/backups' && req.method === 'POST') accion = 'Programó Backups Inteligentes';
-                    else if (req.path === '/api/backups/manual' && req.method === 'POST') accion = 'Programó Backup Manual';
+                    let match;
+                    let targetName = '';
+                    let targetId = '';
+                    
+                    try {
+                        const idMatch = req.path.match(/\/(\d+)(\/|$)/);
+                        if (idMatch && idMatch[1]) {
+                            targetId = idMatch[1];
+                            if (req.path.includes('/usuarios') || req.path.includes('/caddies')) {
+                                const u = await db.prepare('SELECT nombre FROM usuarios WHERE id = ?').get(targetId);
+                                if (u) targetName = u.nombre;
+                            } else if (req.path.includes('/servicios')) {
+                                const s = await db.prepare('SELECT u.nombre FROM servicios s JOIN usuarios u ON s.caddie_id = u.id WHERE s.id = ?').get(targetId);
+                                if (s) targetName = `(Caddie asignado: ${s.nombre})`;
+                            }
+                        }
+                    } catch (e) {}
+
+                    let targetStr = targetName ? targetName : (targetId ? `ID #${targetId}` : '');
+
+                    if (req.path === '/api/servicios' && req.method === 'POST') accion = `Creó un nuevo turno para ${req.body.deporte || 'un deporte'}`;
+                    else if ((match = req.path.match(/^\/api\/servicios\/(\d+)$/)) && req.method === 'DELETE') accion = `Eliminó el turno ${targetStr}`;
+                    else if ((match = req.path.match(/^\/api\/servicios\/(\d+)\/estado$/)) && req.method === 'PATCH') accion = `Cambió el estado del turno ${targetStr} a '${req.body.estado || 'Desconocido'}'`;
+                    else if ((match = req.path.match(/^\/api\/servicios\/(\d+)\/hora$/)) && req.method === 'PUT') accion = `Cambió la hora del turno ${targetStr} a '${req.body.hora || ''}'`;
+                    else if ((match = req.path.match(/^\/api\/servicios\/(\d+)\/confirmar$/))) accion = `Confirmó/Rechazó o Reasignó el turno ${targetStr}`;
+                    else if (req.path === '/api/caddies' && req.method === 'POST') accion = `Registró al nuevo Caddie: ${req.body.nombre || ''}`;
+                    else if ((match = req.path.match(/^\/api\/caddies\/(\d+)$/)) && req.method === 'PUT') accion = `Editó los datos de ${targetStr}`;
+                    else if ((match = req.path.match(/^\/api\/usuarios\/(\d+)$/)) && req.method === 'PUT') {
+                        if (req.body.estado) accion = `Cambió el estado a '${req.body.estado}' para ${targetStr}`;
+                        else accion = `Editó los datos de ${targetStr}`;
+                    }
+                    else if ((match = req.path.match(/^\/api\/caddies\/(\d+)\/horario$/)) && req.method === 'PUT') accion = `Actualizó el horario semanal de ${targetStr}`;
+                    else if ((match = req.path.match(/^\/api\/caddies\/(\d+)\/estado$/)) && req.method === 'PATCH') accion = `Cambió el estado a '${req.body.estado}' de ${targetStr}`;
+                    else if ((match = req.path.match(/^\/api\/caddies\/(\d+)$/)) && req.method === 'DELETE') accion = `Eliminó a ${targetStr}`;
+                    else if (req.path === '/api/perfil/estado-club' && req.method === 'POST') accion = `Marcó Entrada/Salida de Caddie en el Club`;
+                    else if (req.path === '/api/backups' && req.method === 'POST') accion = `Programó Backups Inteligentes para la fecha: ${req.body.fecha || ''}`;
+                    else if (req.path === '/api/backups/manual' && req.method === 'POST') accion = `Asignó Backup Manual al Caddie ID #${req.body.caddie_id || ''}`;
                     
                     await registrarLog(adminNombre, adminRol, accion, { path: req.path, method: req.method, body: req.body });
                 }
