@@ -2327,7 +2327,10 @@ setInterval(ejecutarMantenimiento, 1000 * 60 * 60);
 function ejecutarIniciosAutomaticos() {
     try {
         const hoy = getLocalDate();
-        const ahora = new Date().toLocaleTimeString('en-US', {hour12: false, hour: '2-digit', minute:'2-digit'});
+        const d = new Date();
+        const hh = String(d.getHours()).padStart(2, '0');
+        const mm = String(d.getMinutes()).padStart(2, '0');
+        const ahora = `${hh}:${mm}:59`;
         
         // Find services for today, that are Pendiente, have a caddie, and hora_inicio_programada <= ahora
         const serviciosParaIniciar = db.prepare(`
