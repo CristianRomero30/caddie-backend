@@ -884,10 +884,17 @@ app.patch('/api/servicios/:id/hora', async (req, res) => {
           `).run(caddie_id, fecha, cancha_id);
 
           // 3. Manejo de backup caddie
+          const getLocalDate = () => {
+    const formatter = new Intl.DateTimeFormat('en-CA', { 
+        timeZone: 'America/Bogota', 
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit' 
+    });
+    return formatter.format(new Date()); // Retorna YYYY-MM-DD
+}
           if (prev_caddie_id && prev_caddie_backup_action) {
-              const d = new Date();
-              d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-              const hoyStr = d.toISOString().split('T')[0];
+              const hoyStr = getLocalDate();
               
               const turnoNormalizado = prev_caddie_backup_action === 'Mañana' ? 'Mañana' : 'Tarde';
               
@@ -2324,16 +2331,17 @@ ejecutarMantenimiento();
 setInterval(ejecutarMantenimiento, 1000 * 60 * 60);
 
 // --- AUTO-INICIO DE TURNOS ---
-function ejecutarIniciosAutomaticos() {
+async function ejecutarIniciosAutomaticos() {
     try {
         const hoy = getLocalDate();
-        const d = new Date();
-        const hh = String(d.getHours()).padStart(2, '0');
-        const mm = String(d.getMinutes()).padStart(2, '0');
-        const ahora = `${hh}:${mm}:59`;
+        
+        // Obtener la hora actual exacta en Colombia
+        const nowColombia = new Date().toLocaleString("en-US", { timeZone: "America/Bogota", hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const ahora = nowColombia; // ya viene en formato HH:MM:SS
+        
         
         // Find services for today, that are Pendiente, have a caddie, and hora_inicio_programada <= ahora
-        const serviciosParaIniciar = db.prepare(`
+        const serviciosParaIniciar = await db.prepare(`
             SELECT id FROM servicios 
             WHERE fecha_servicio = ? 
             AND estado = 'Pendiente' 
@@ -2343,11 +2351,11 @@ function ejecutarIniciosAutomaticos() {
             AND hora_inicio_programada IS NOT NULL
         `).all(hoy, ahora);
 
-        if (serviciosParaIniciar.length > 0) {
+        if (serviciosParaIniciar && serviciosParaIniciar.length > 0) {
             const updateStmt = db.prepare("UPDATE servicios SET estado = 'En Juego', hora_inicio_real = COALESCE(hora_inicio_real, ?) WHERE id = ?");
-            db.transaction((servicios) => {
+            await db.transaction(async (servicios) => {
                 for (const s of servicios) {
-                    updateStmt.run(ahora, s.id);
+                    await updateStmt.run(ahora, s.id);
                 }
             })(serviciosParaIniciar);
             console.log(`✅ [AUTO-INICIO] Se iniciaron automáticamente ${serviciosParaIniciar.length} turnos.`);
