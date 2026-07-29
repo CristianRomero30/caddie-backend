@@ -175,6 +175,15 @@ app.use(async (req, res, next) => {
                             } else if (req.path.includes('/servicios')) {
                                 const s = await db.prepare('SELECT u.nombre FROM servicios s JOIN usuarios u ON s.caddie_id = u.id WHERE s.id = ?').get(targetId);
                                 if (s) targetName = `(Caddie asignado: ${s.nombre})`;
+                            } else if (req.path.includes('/backups')) {
+                                const b = await db.prepare('SELECT u.nombre FROM backups_programados b JOIN usuarios u ON b.caddie_id = u.id WHERE b.id = ?').get(targetId);
+                                if (b) targetName = `(Backup asignado a: ${b.nombre})`;
+                            }
+                        } else if (req.path === '/api/backups/manual' && req.body && req.body.caddie_id) {
+                            const u = await db.prepare('SELECT nombre FROM usuarios WHERE id = ?').get(req.body.caddie_id);
+                            if (u) {
+                                targetName = u.nombre;
+                                targetId = req.body.caddie_id;
                             }
                         }
                     } catch (e) {}
@@ -197,7 +206,16 @@ app.use(async (req, res, next) => {
                     else if ((match = req.path.match(/^\/api\/caddies\/(\d+)$/)) && req.method === 'DELETE') accion = `Eliminó a ${targetStr}`;
                     else if (req.path === '/api/perfil/estado-club' && req.method === 'POST') accion = `Marcó Entrada/Salida de Caddie en el Club`;
                     else if (req.path === '/api/backups' && req.method === 'POST') accion = `Programó Backups Inteligentes para la fecha: ${req.body.fecha || ''}`;
-                    else if (req.path === '/api/backups/manual' && req.method === 'POST') accion = `Asignó Backup Manual al Caddie ID #${req.body.caddie_id || ''}`;
+                    else if (req.path === '/api/backups/manual' && req.method === 'POST') accion = `Asignó Backup Manual a ${targetStr}`;
+                    else if ((match = req.path.match(/^\/api\/backups\/(\d+)$/)) && req.method === 'DELETE') accion = `Eliminó Backup ${targetStr}`;
+                    else if ((match = req.path.match(/^\/api\/backups\/(\d+)$/)) && req.method === 'PUT') {
+                        let newName = req.body.caddie_id;
+                        try {
+                           const u = await db.prepare('SELECT nombre FROM usuarios WHERE id = ?').get(req.body.caddie_id);
+                           if (u) newName = u.nombre;
+                        } catch(e) {}
+                        accion = `Modificó Backup ${targetStr} (Nuevo Caddie: ${newName})`;
+                    }
                     
                     await registrarLog(adminNombre, adminRol, accion, { path: req.path, method: req.method, body: req.body });
                 }
