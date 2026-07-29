@@ -167,8 +167,11 @@ app.use(async (req, res, next) => {
                     else if (req.path.match(/^\/api\/servicios\/\d+\/hora$/) && req.method === 'PUT') accion = 'Cambió la hora de un turno';
                     else if (req.path.match(/^\/api\/servicios\/\d+\/confirmar$/)) accion = 'Confirmó/Rechazó o Reasignó un turno';
                     else if (req.path === '/api/caddies' && req.method === 'POST') accion = 'Registró un nuevo Caddie';
-                    else if (req.path.match(/^\/api\/caddies\/\d+$/) && req.method === 'PUT') accion = 'Editó un Caddie';
+                    else if (req.path.match(/^\/api\/caddies\/\d+$/) && req.method === 'PUT') accion = 'Editó los datos de un Caddie';
+                    else if (req.path.match(/^\/api\/usuarios\/\d+$/) && req.method === 'PUT') accion = 'Editó un Usuario / Cambió Estado';
+                    else if (req.path.match(/^\/api\/caddies\/\d+\/estado$/) && req.method === 'PATCH') accion = 'Cambió el estado (Activo/Inactivo/Retirado) de un Caddie';
                     else if (req.path.match(/^\/api\/caddies\/\d+$/) && req.method === 'DELETE') accion = 'Eliminó un Caddie';
+                    else if (req.path === '/api/perfil/estado-club' && req.method === 'POST') accion = 'Marcó Entrada/Salida de Caddie en el Club';
                     else if (req.path === '/api/backups' && req.method === 'POST') accion = 'Programó Backups Inteligentes';
                     else if (req.path === '/api/backups/manual' && req.method === 'POST') accion = 'Programó Backup Manual';
                     
