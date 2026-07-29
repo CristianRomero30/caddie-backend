@@ -133,6 +133,62 @@ initDB();
 
 app.use(cors());
 app.use(express.json());
+
+// --- SISTEMA DE AUDITORIA ---
+const registrarLog = async (usuarioNombre, rol, accion, detalles) => {
+    try {
+        const fechaStr = new Date().toLocaleString("en-US", { timeZone: "America/Bogota", hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(',', '');
+        const [datePart, timePart] = fechaStr.split(' ');
+        const [mm, dd, yyyy] = datePart.split('/');
+        const fechaDB = `${yyyy}-${mm}-${dd} ${timePart}`;
+
+        const safeDetalles = { ...detalles };
+        if (safeDetalles.password) delete safeDetalles.password;
+
+        const stmt = await db.prepare('INSERT INTO logs_auditoria (fecha, usuario_nombre, rol, accion, detalles) VALUES (?, ?, ?, ?, ?)');
+        await stmt.run(fechaDB, usuarioNombre, rol, accion, JSON.stringify(safeDetalles));
+    } catch (e) {
+        console.error('Error registrando log:', e);
+    }
+};
+
+app.use(async (req, res, next) => {
+    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method) && req.path.startsWith('/api') && !req.path.startsWith('/api/auth') && !req.path.startsWith('/api/logs_auditoria')) {
+        const adminNombre = req.headers['x-admin-nombre'];
+        const adminRol = req.headers['x-admin-rol'];
+        
+        if (adminNombre && adminRol && adminRol !== 'Caddie') {
+            res.on('finish', async () => {
+                if (res.statusCode >= 200 && res.statusCode < 300) {
+                    let accion = `${req.method} ${req.path}`;
+                    if (req.path === '/api/servicios' && req.method === 'POST') accion = 'Creó un nuevo turno/servicio';
+                    else if (req.path.match(/^\/api\/servicios\/\d+$/) && req.method === 'DELETE') accion = 'Eliminó un turno/servicio';
+                    else if (req.path.match(/^\/api\/servicios\/\d+\/estado$/) && req.method === 'PATCH') accion = 'Cambió el estado de un turno';
+                    else if (req.path.match(/^\/api\/servicios\/\d+\/hora$/) && req.method === 'PUT') accion = 'Cambió la hora de un turno';
+                    else if (req.path.match(/^\/api\/servicios\/\d+\/confirmar$/)) accion = 'Confirmó/Rechazó o Reasignó un turno';
+                    else if (req.path === '/api/caddies' && req.method === 'POST') accion = 'Registró un nuevo Caddie';
+                    else if (req.path.match(/^\/api\/caddies\/\d+$/) && req.method === 'PUT') accion = 'Editó un Caddie';
+                    else if (req.path.match(/^\/api\/caddies\/\d+$/) && req.method === 'DELETE') accion = 'Eliminó un Caddie';
+                    else if (req.path === '/api/backups' && req.method === 'POST') accion = 'Programó Backups Inteligentes';
+                    else if (req.path === '/api/backups/manual' && req.method === 'POST') accion = 'Programó Backup Manual';
+                    
+                    await registrarLog(adminNombre, adminRol, accion, { path: req.path, method: req.method, body: req.body });
+                }
+            });
+        }
+    }
+    next();
+});
+
+// Endpoint para leer logs
+app.get('/api/logs_auditoria', async (req, res) => {
+    try {
+        const logs = await db.prepare('SELECT * FROM logs_auditoria ORDER BY fecha DESC LIMIT 500').all();
+        res.json(logs);
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
 app.get('/api/incidencias', async (req, res) => {
     try {
         const incidencias = await db.prepare(`SELECT i.*, u.nombre as caddie_nombre FROM incidencias i LEFT JOIN usuarios u ON i.reportado_por_id = u.id ORDER BY i.id DESC`).all();
@@ -179,6 +235,8 @@ app.post('/api/auth/login', async (req, res) => {
                     return res.status(403).json({ success: false, message: 'Acceso restringido: Solo el personal administrativo puede ingresar al sistema.' });
                 }
                 const { password: _, ...userData } = user;
+                // Registrar log de inicio de sesión
+                await registrarLog(user.nombre, user.rol, 'Inició sesión en el sistema', {});
                 res.json({ success: true, user: userData });
             } else {
                 res.status(401).json({ success: false, message: 'Credenciales inválidas' });
