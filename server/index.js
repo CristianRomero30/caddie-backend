@@ -1220,7 +1220,19 @@ app.post('/api/cronograma/generar', async (req, res) => {
 
             // 3. Caddies Disponibles (Horario + Activo)
             const esHoy = (fecha === hoy);
-            const orderBy = esHoy ? 'p.esta_en_club DESC, p.horas_acumuladas ASC' : 'p.horas_acumuladas ASC';
+            
+            // Obtener turnos pendientes futuros para sumar horas virtuales
+            const turnosPendientes = await db.prepare(`
+                SELECT caddie_id, COUNT(*) as count 
+                FROM servicios 
+                WHERE caddie_id IS NOT NULL AND estado IN ('Pendiente', 'En Juego') 
+                AND fecha_servicio >= ?
+                GROUP BY caddie_id
+            `).all(hoy);
+            const pendingTurnsMap = new Map();
+            for (const t of turnosPendientes) {
+                pendingTurnsMap.set(t.caddie_id, t.count);
+            }
 
             const caddiesDisponibles = await db.prepare(`
                 SELECT u.id, u.nombre, u.deporte, p.horas_acumuladas, h.manana, h.tarde, h.horas_disponibles, p.esta_en_club
@@ -1228,8 +1240,23 @@ app.post('/api/cronograma/generar', async (req, res) => {
                 JOIN perfiles_caddie p ON u.id = p.usuario_id
                 JOIN horarios_caddie h ON u.id = h.usuario_id
                 WHERE u.rol_id = 4 AND u.estado = 'Activo' AND h.dia_semana = ?
-                ORDER BY ${orderBy}
             `).all(diaProcesado);
+
+            // Calcular horas efectivas y factor de desempate aleatorio
+            for (const c of caddiesDisponibles) {
+                const pending = pendingTurnsMap.get(c.id) || 0;
+                c.horas_efectivas = c.horas_acumuladas + (pending * 4.5);
+                c.random_tiebreaker = Math.random();
+            }
+
+            // Ordenar por presencia (si es hoy), luego horas efectivas, luego aleatorio
+            caddiesDisponibles.sort((a, b) => {
+                if (esHoy) {
+                    if (b.esta_en_club !== a.esta_en_club) return b.esta_en_club - a.esta_en_club;
+                }
+                if (a.horas_efectivas !== b.horas_efectivas) return a.horas_efectivas - b.horas_efectivas;
+                return a.random_tiebreaker - b.random_tiebreaker;
+            });
 
             // Obtener novedades que afecten esta fecha
             const novedades = await db.prepare(`
@@ -1364,9 +1391,13 @@ app.post('/api/cronograma/generar', async (req, res) => {
                             `).all(fecha, serv.hora_inicio_programada);
                             const ocupadasIds = new Set(canchasOcupadas.map(c => c.cancha_id));
                             
-                            const canchaDisponible = todasLasCanchas.find(c => !ocupadasIds.has(c.id));
-                            if (canchaDisponible) {
-                                canchaAsignadaId = canchaDisponible.id;
+                            const canchasLibres = todasLasCanchas.filter(c => !ocupadasIds.has(c.id));
+                            if (canchasLibres.length > 0) {
+                                // Seleccionar aleatoriamente pero preservando el tipo (Cancha vs Mini Tenis)
+                                const firstAvailableType = canchasLibres[0].nombre.includes('Mini Tenis') ? 'Mini Tenis' : 'Cancha';
+                                const preferredCanchas = canchasLibres.filter(c => c.nombre.includes(firstAvailableType));
+                                const randomIndex = Math.floor(Math.random() * preferredCanchas.length);
+                                canchaAsignadaId = preferredCanchas[randomIndex].id;
                             } else {
                                 log(`⚠️ No hay canchas disponibles para Turno #${serv.id} a las ${serv.hora_inicio_programada}`);
                             }
