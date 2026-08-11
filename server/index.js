@@ -1251,7 +1251,7 @@ app.post('/api/cronograma/generar', async (req, res) => {
                 FROM usuarios u
                 JOIN perfiles_caddie p ON u.id = p.usuario_id
                 JOIN horarios_caddie h ON u.id = h.usuario_id
-                WHERE u.rol_id = 4 AND u.estado = 'Activo' AND h.dia_semana = ?
+                WHERE u.rol_id = 4 AND u.estado = 'Activo' AND h.dia_semana = ? AND h.es_estudio = 0
             `).all(diaProcesado);
 
             // Calcular horas efectivas y factor de desempate aleatorio
@@ -1603,6 +1603,7 @@ app.post('/api/incidencias', async (req, res) => {
                     JOIN horarios_caddie h ON u.id = h.usuario_id
                     WHERE u.rol_id = 4 AND u.estado = 'Activo' 
                     AND h.dia_semana = ? 
+                    AND h.es_estudio = 0
                     AND ( ( ? = 1 AND h.manana = 1 ) OR ( ? = 0 AND h.tarde = 1 ) )
                     AND u.id != ?
                     AND (u.deporte = 'Ambos' OR u.deporte = ?)
