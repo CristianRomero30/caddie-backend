@@ -201,7 +201,19 @@ app.use(async (req, res, next) => {
                         if (req.body.estado) accion = `Cambió el estado a '${req.body.estado}' para ${targetStr}`;
                         else accion = `Editó los datos de ${targetStr}`;
                     }
-                    else if ((match = req.path.match(/^\/api\/caddies\/(\d+)\/horario$/)) && req.method === 'PUT') accion = `Actualizó el horario semanal de ${targetStr}`;
+                    else if ((match = req.path.match(/^\/api\/caddies\/(\d+)\/horario$/)) && req.method === 'PUT') {
+                        let diasActivos = [];
+                        if (req.body && req.body.horario && Array.isArray(req.body.horario)) {
+                            const nombresDias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+                            req.body.horario.forEach(diaInfo => {
+                                if (diaInfo.manana || diaInfo.tarde || (diaInfo.horas_disponibles && diaInfo.horas_disponibles.length > 0)) {
+                                    if (nombresDias[diaInfo.dia]) diasActivos.push(nombresDias[diaInfo.dia]);
+                                }
+                            });
+                        }
+                        const diasStr = diasActivos.length > 0 ? ` (Días activos: ${diasActivos.join(', ')})` : ' (Sin días activos)';
+                        accion = `Actualizó el horario semanal de ${targetStr}${diasStr}`;
+                    }
                     else if ((match = req.path.match(/^\/api\/caddies\/(\d+)\/estado$/)) && req.method === 'PATCH') accion = `Cambió el estado a '${req.body.estado}' de ${targetStr}`;
                     else if ((match = req.path.match(/^\/api\/caddies\/(\d+)$/)) && req.method === 'DELETE') accion = `Eliminó a ${targetStr}`;
                     else if (req.path === '/api/perfil/estado-club' && req.method === 'POST') accion = `Marcó Entrada/Salida de Caddie en el Club`;
