@@ -2421,6 +2421,7 @@ app.get('/api/reportes/puntualidad', async (req, res) => {
             SELECT 
                 u.id as caddie_id,
                 u.nombre as caddie_nombre,
+                u.deporte,
                 COUNT(s.id) as total_servicios,
                 SUM(CASE WHEN (s.es_puntual = 1 OR (s.es_puntual IS NULL AND s.estado IN ('En Juego', 'Completado'))) AND (s.estado_confirmacion != 'Reasignado por novedad' AND s.estado_confirmacion != 'Rechazado') THEN 1 ELSE 0 END) as puntuales,
                 SUM(CASE WHEN s.es_puntual = 0 AND (s.estado_confirmacion != 'Reasignado por novedad' AND s.estado_confirmacion != 'Rechazado') THEN 1 ELSE 0 END) as tardanzas,
