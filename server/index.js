@@ -492,7 +492,11 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
                 2: 95  // David Alejandro Velásquez
             };
 
-            let caddiesRestantes = [...caddiesDisponibles];
+            // Novedad: Filtrar los backups de la mañana para NO asignarlos a canchas completas
+            const backupsMananaDB = await db.prepare("SELECT caddie_id FROM backups_programados WHERE fecha = ? AND turno = 'mañana' AND (deporte = 'Tenis' OR deporte = 'Ambos')").all(fecha);
+            const backupMananaIds = new Set(backupsMananaDB.map(b => b.caddie_id));
+
+            let caddiesRestantes = caddiesDisponibles.filter(c => !backupMananaIds.has(c.id));
 
             for (const cancha of canchas) {
                 let caddieSeleccionado = null;
