@@ -1304,12 +1304,12 @@ app.post('/api/cronograma/generar', async (req, res) => {
                 ORDER BY CASE WHEN nombre LIKE 'Cancha %' THEN 0 ELSE 1 END, CAST(REGEXP_REPLACE(nombre, '[^0-9]', '') AS UNSIGNED)
             `).all();
 
-            // Obtener backups de la mañana de Tenis
-            const backupsMananaTenisDB = await db.prepare("SELECT caddie_id FROM backups_programados WHERE fecha = ? AND turno = 'mañana' AND deporte = 'Tenis'").all(fecha);
+            // Obtener backups de la mañana de Tenis (incluyendo Ambos)
+            const backupsMananaTenisDB = await db.prepare("SELECT caddie_id FROM backups_programados WHERE fecha = ? AND turno = 'mañana' AND deporte IN ('Tenis', 'Ambos')").all(fecha);
             const morningTenisBackups = new Set(backupsMananaTenisDB.map(b => b.caddie_id));
 
-            // Obtener todos los backups de Golf
-            const backupsGolfDB = await db.prepare("SELECT caddie_id FROM backups_programados WHERE fecha = ? AND deporte = 'Golf'").all(fecha);
+            // Obtener todos los backups de Golf (incluyendo Ambos)
+            const backupsGolfDB = await db.prepare("SELECT caddie_id FROM backups_programados WHERE fecha = ? AND deporte IN ('Golf', 'Ambos')").all(fecha);
             const golfBackups = new Set(backupsGolfDB.map(b => b.caddie_id));
 
             // 4. Bucle de Asignación
