@@ -1799,6 +1799,13 @@ app.get('/api/jugadores', async (req, res) => {
 app.post('/api/usuarios', async (req, res) => {
     const { nombre, email, password, telefono, deporte, rol_id } = req.body;
     try {
+        if (nombre) {
+            const existing = await db.prepare('SELECT id FROM usuarios WHERE LOWER(TRIM(nombre)) = LOWER(TRIM(?))').get(nombre);
+            if (existing) {
+                return res.status(400).json({ success: false, message: 'Ya existe un usuario con este mismo nombre' });
+            }
+        }
+
         const hashedPassword = bcrypt.hashSync(password || 'club123', 10);
         const info = await db.prepare(`
             INSERT INTO usuarios (nombre, email, password, telefono, deporte, rol_id, estado)
@@ -1835,6 +1842,13 @@ app.put('/api/usuarios/:id', async (req, res) => {
     const { id } = req.params;
     const { nombre, email, telefono, deporte, estado } = req.body;
     try {
+        if (nombre) {
+            const existing = await db.prepare('SELECT id FROM usuarios WHERE LOWER(TRIM(nombre)) = LOWER(TRIM(?)) AND id != ?').get(nombre, id);
+            if (existing) {
+                return res.status(400).json({ success: false, message: 'Ya existe otro usuario con este mismo nombre' });
+            }
+        }
+
         await db.prepare(`
             UPDATE usuarios 
             SET nombre = COALESCE(?, nombre), 
@@ -2156,6 +2170,13 @@ app.post('/api/caddies', async (req, res) => {
     const { nombre, email, password, telefono, deporte } = req.body;
     
     try {
+        if (nombre) {
+            const existing = await db.prepare('SELECT id FROM usuarios WHERE LOWER(TRIM(nombre)) = LOWER(TRIM(?))').get(nombre);
+            if (existing) {
+                return res.status(400).json({ success: false, message: 'Ya existe un caddie registrado con este mismo nombre' });
+            }
+        }
+
         const hashedPassword = bcrypt.hashSync(password || 'caddie123', 10);
         
         const transaction = db.transaction(async () => {
