@@ -1886,6 +1886,37 @@ app.put('/api/usuarios/:id/password', async (req, res) => {
 });
 
 // Inteligencia: Obtener Caddies Disponibles para una fecha/hora específica
+app.get('/api/caddies/disponibles_dia', async (req, res) => {
+    const { fecha } = req.query; // fecha: YYYY-MM-DD
+    if (!fecha) return res.status(400).json({ error: 'Falta fecha' });
+
+    try {
+        const [y, m, d_part] = fecha.split('-').map(Number);
+        const dateObj = new Date(y, m - 1, d_part);
+        let diaJS = dateObj.getDay();
+        const festivos = ['2026-07-13', '2026-07-20', '2026-08-07', '2026-08-17', '2026-10-12', '2026-11-02', '2026-11-16', '2026-12-08', '2026-12-25'];
+        if (festivos.includes(fecha)) diaJS = 0;
+        let diaProcesado = diaJS === 0 ? 6 : diaJS - 1;
+
+        let query = `
+            SELECT u.*
+            FROM usuarios u
+            JOIN horarios_caddie h ON u.id = h.usuario_id
+            WHERE u.rol_id = 4 
+            AND u.estado = 'Activo'
+            AND h.dia_semana = ? 
+            AND h.es_estudio = 0
+            ORDER BY u.nombre ASC
+        `;
+        
+        const disponibles = await db.prepare(query).all(diaProcesado);
+        res.json(disponibles);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error del servidor al obtener caddies del día' });
+    }
+});
+
 app.get('/api/caddies/disponibles', async (req, res) => {
     const { fecha, hora, deporte } = req.query; // fecha: YYYY-MM-DD, hora: HH:mm
     if (!fecha || !hora) return res.status(400).json({ error: 'Falta fecha u hora' });
