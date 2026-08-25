@@ -1335,8 +1335,8 @@ app.post('/api/cronograma/generar', async (req, res) => {
                         continue;
                     }
 
-                    // Los backups de la mañana de tenis NO pueden ser asignados a turnos a partir de la 1:00 PM (13:00)
-                    if (hour >= 13 && morningTenisBackups.has(c.id)) {
+                    // Los backups de la mañana de tenis NO pueden ser asignados a turnos a partir de la 1:00 PM (13:00) ni a turnos de las 6:00 AM
+                    if ((hour >= 13 || hour === 6) && morningTenisBackups.has(c.id)) {
                         continue;
                     }
 
