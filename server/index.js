@@ -228,8 +228,12 @@ app.use(async (req, res, next) => {
                         } catch(e) {}
                         accion = `Modificó Backup ${targetStr} (Nuevo Caddie: ${newName})`;
                     }
+                    else if (req.path === '/api/importar-horario' && req.method === 'POST') accion = `Importó turnos desde un archivo Excel`;
+                    else if ((match = req.path.match(/^\/api\/servicios\/(\d+)\/asignar$/)) && req.method === 'PATCH') accion = `Reasignó/Asignó un Caddie al turno ${targetStr}`;
+                    else if ((match = req.path.match(/^\/api\/canchas\/asignar$/)) && req.method === 'POST') accion = `Asignó un Caddie a una Cancha completa`;
+                    else if ((match = req.path.match(/^\/api\/canchas\/asignaciones\/tarde$/)) && req.method === 'PATCH') accion = `Asignó un Caddie a una Cancha para el turno tarde`;
                     
-                    await registrarLog(adminNombre, adminRol, accion, { path: req.path, method: req.method, body: req.body });
+                    await registrarLog(adminNombre, adminRol, accion, req.body);
                 }
             });
         }
