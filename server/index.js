@@ -1902,8 +1902,8 @@ app.get('/api/caddies/disponibles_dia', async (req, res) => {
             SELECT 
                 u.*,
                 p.horas_acumuladas, p.calificacion, p.disponibilidad, p.esta_en_club, p.fecha_entrada_club, p.turno_backup, p.deporte_backup,
-                (SELECT json_group_array(
-                    json_object(
+                (SELECT JSON_ARRAYAGG(
+                    JSON_OBJECT(
                         'dia', hc.dia_semana, 
                         'manana', hc.manana, 
                         'tarde', hc.tarde, 
