@@ -1899,8 +1899,20 @@ app.get('/api/caddies/disponibles_dia', async (req, res) => {
         let diaProcesado = diaJS === 0 ? 6 : diaJS - 1;
 
         let query = `
-            SELECT u.*
+            SELECT 
+                u.*,
+                p.horas_acumuladas, p.calificacion, p.disponibilidad, p.esta_en_club, p.fecha_entrada_club, p.turno_backup, p.deporte_backup,
+                (SELECT json_group_array(
+                    json_object(
+                        'dia', hc.dia_semana, 
+                        'manana', hc.manana, 
+                        'tarde', hc.tarde, 
+                        'estudio', hc.es_estudio,
+                        'horas_disponibles', hc.horas_disponibles
+                    )
+                ) FROM horarios_caddie hc WHERE hc.usuario_id = u.id) as horario
             FROM usuarios u
+            LEFT JOIN perfiles_caddie p ON u.id = p.usuario_id
             JOIN horarios_caddie h ON u.id = h.usuario_id
             WHERE u.rol_id = 4 
             AND u.estado = 'Activo'
@@ -1909,7 +1921,14 @@ app.get('/api/caddies/disponibles_dia', async (req, res) => {
             ORDER BY u.nombre ASC
         `;
         
-        const disponibles = await db.prepare(query).all(diaProcesado);
+        let disponibles = await db.prepare(query).all(diaProcesado);
+        
+        // Parsear el JSON del horario
+        disponibles = disponibles.map(c => ({
+            ...c,
+            horario: typeof c.horario === 'string' ? JSON.parse(c.horario || '[]') : (c.horario || [])
+        }));
+        
         res.json(disponibles);
     } catch (error) {
         console.error(error);
