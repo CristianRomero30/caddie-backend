@@ -173,8 +173,14 @@ app.use(async (req, res, next) => {
                                 const u = await db.prepare('SELECT nombre FROM usuarios WHERE id = ?').get(targetId);
                                 if (u) targetName = u.nombre;
                             } else if (req.path.includes('/servicios')) {
-                                const s = await db.prepare('SELECT u.nombre FROM servicios s JOIN usuarios u ON s.caddie_id = u.id WHERE s.id = ?').get(targetId);
-                                if (s) targetName = `(Caddie asignado: ${s.nombre})`;
+                                // Check if delete stored details in res.locals before the row was removed
+                                if (res.locals && res.locals.deletedServiceInfo) {
+                                    const info = res.locals.deletedServiceInfo;
+                                    targetName = `${info.jugador} | ${info.deporte} | ${info.fecha} ${info.hora}${info.caddie ? ' | Caddie: ' + info.caddie : ''}`;
+                                } else {
+                                    const s = await db.prepare('SELECT u.nombre as caddie_nombre, u2.nombre as jugador_nombre, srv.hora_inicio_programada, srv.fecha_servicio, srv.deporte FROM servicios srv LEFT JOIN usuarios u ON srv.caddie_id = u.id JOIN usuarios u2 ON srv.socio_id = u2.id WHERE srv.id = ?').get(targetId);
+                                    if (s) targetName = `${s.jugador_nombre} | ${s.deporte} | ${s.fecha_servicio} ${s.hora_inicio_programada}${s.caddie_nombre ? ' | Caddie: ' + s.caddie_nombre : ''}`;
+                                }
                             } else if (req.path.includes('/backups')) {
                                 const b = await db.prepare('SELECT u.nombre FROM backups_programados b JOIN usuarios u ON b.caddie_id = u.id WHERE b.id = ?').get(targetId);
                                 if (b) targetName = `(Backup asignado a: ${b.nombre})`;
@@ -191,7 +197,7 @@ app.use(async (req, res, next) => {
                     let targetStr = targetName ? targetName : (targetId ? `ID #${targetId}` : '');
 
                     if (req.path === '/api/servicios' && req.method === 'POST') accion = `Creó un nuevo turno para ${req.body.deporte || 'un deporte'}`;
-                    else if ((match = req.path.match(/^\/api\/servicios\/(\d+)$/)) && req.method === 'DELETE') accion = `Eliminó el turno ${targetStr}`;
+                    else if ((match = req.path.match(/^\/api\/servicios\/(\d+)$/)) && req.method === 'DELETE') accion = `Eliminó el turno: ${targetStr}`;
                     else if ((match = req.path.match(/^\/api\/servicios\/(\d+)\/estado$/)) && req.method === 'PATCH') accion = `Cambió el estado del turno ${targetStr} a '${req.body.estado || 'Desconocido'}'`;
                     else if ((match = req.path.match(/^\/api\/servicios\/(\d+)\/hora$/)) && req.method === 'PUT') accion = `Cambió la hora del turno ${targetStr} a '${req.body.hora || ''}'`;
                     else if ((match = req.path.match(/^\/api\/servicios\/(\d+)\/confirmar$/))) accion = `Confirmó/Rechazó o Reasignó el turno ${targetStr}`;
@@ -1114,14 +1120,28 @@ app.patch('/api/servicios/:id/asignar', async (req, res) => {
 app.delete('/api/servicios/:id', async (req, res) => {
     const { id } = req.params;
     try {
+        // Fetch full service details BEFORE deleting (for audit log)
+        const serviceDetails = await db.prepare(
+            'SELECT s.hora_inicio_programada, s.fecha_servicio, s.deporte, s.caddie_id, s.estado, s.horas_reales, u1.nombre as jugador_nombre, u2.nombre as caddie_nombre FROM servicios s JOIN usuarios u1 ON s.socio_id = u1.id LEFT JOIN usuarios u2 ON s.caddie_id = u2.id WHERE s.id = ?'
+        ).get(id);
+
+        if (serviceDetails) {
+            res.locals.deletedServiceInfo = {
+                jugador: serviceDetails.jugador_nombre,
+                caddie: serviceDetails.caddie_nombre || null,
+                hora: serviceDetails.hora_inicio_programada,
+                fecha: serviceDetails.fecha_servicio,
+                deporte: serviceDetails.deporte
+            };
+        }
+
         const transaction = db.transaction(async () => {
             // 1. Verificar si el servicio estaba completado para restar horas
-            const servicio = db.prepare('SELECT caddie_id, estado, horas_reales FROM servicios WHERE id = ?').get(id);
-            if (servicio && servicio.estado === 'Completado' && servicio.caddie_id) {
-                const horas = servicio.horas_reales || 4.5;
+            if (serviceDetails && serviceDetails.estado === 'Completado' && serviceDetails.caddie_id) {
+                const horas = serviceDetails.horas_reales || 4.5;
                 await db.prepare('UPDATE perfiles_caddie SET horas_acumuladas = MAX(0, horas_acumuladas - ?) WHERE usuario_id = ?')
-                  .run(horas, servicio.caddie_id);
-                console.log(`⏪ Revertidas ${horas}h al caddie #${servicio.caddie_id} (Servicio eliminado)`);
+                  .run(horas, serviceDetails.caddie_id);
+                console.log(`⏪ Revertidas ${horas}h al caddie #${serviceDetails.caddie_id} (Servicio eliminado)`);
             }
 
             // 2. Eliminar incidencias y servicio
