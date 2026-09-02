@@ -2353,7 +2353,13 @@ app.post('/api/importar-horario', upload.single('file'), async (req, res) => {
             INSERT INTO servicios 
             (socio_id, fecha_servicio, hora_inicio_programada, deporte, estado, external_id, observaciones, tiene_boliador, nombre_boliador, cancha_id, tee)
             VALUES (?, ?, ?, ?, 'Pendiente', ?, ?, ?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE cancha_id = COALESCE(VALUES(cancha_id), cancha_id), tee = COALESCE(VALUES(tee), tee)
+            ON DUPLICATE KEY UPDATE 
+                cancha_id = COALESCE(VALUES(cancha_id), cancha_id), 
+                tee = COALESCE(VALUES(tee), tee),
+                fecha_servicio = VALUES(fecha_servicio),
+                hora_inicio_programada = VALUES(hora_inicio_programada),
+                tiene_boliador = VALUES(tiene_boliador),
+                nombre_boliador = VALUES(nombre_boliador)
         `);
 
         const userCheckStmt = db.prepare('SELECT id FROM usuarios WHERE nombre = ? AND rol_id = 3');
