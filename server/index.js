@@ -1095,8 +1095,16 @@ app.patch('/api/servicios/:id/asignar', async (req, res) => {
     const { id } = req.params;
     const { caddie_id, cancha_id } = req.body;
     try {
-        const [servicio] = await db.prepare('SELECT fecha_servicio, hora_inicio_programada, deporte, cancha_id FROM servicios WHERE id = ?').all(id);
+        const [servicio] = await db.prepare('SELECT s.fecha_servicio, s.hora_inicio_programada, s.deporte, s.cancha_id, s.caddie_id as prev_caddie_id, u1.nombre as jugador_nombre, u2.nombre as prev_caddie_nombre FROM servicios s JOIN usuarios u1 ON s.socio_id = u1.id LEFT JOIN usuarios u2 ON s.caddie_id = u2.id WHERE s.id = ?').all(id);
         if (!servicio) throw new Error('Servicio no encontrado');
+
+        let nuevoCaddieNombre = 'Sin Caddie';
+        if (caddie_id) {
+            const newC = await db.prepare('SELECT nombre FROM usuarios WHERE id = ?').get(caddie_id);
+            if (newC) nuevoCaddieNombre = newC.nombre;
+        }
+
+        res.locals.customLogAccion = `🔄 Reasignó Caddie al turno: ${servicio.jugador_nombre} | ${servicio.deporte} | ${servicio.fecha_servicio} ${servicio.hora_inicio_programada} (Caddie anterior: ${servicio.prev_caddie_nombre || 'Sin Caddie'} ➔ Nuevo: ${nuevoCaddieNombre})`;
 
         const [y, m, d_part] = servicio.fecha_servicio.split('-').map(Number);
         const dateObj = new Date(y, m - 1, d_part);
@@ -1810,6 +1818,11 @@ app.post('/api/backups', async (req, res) => {
 app.post('/api/backups/manual', async (req, res) => {
     const { fecha, deporte, turno, caddie_id } = req.body;
     try {
+        const caddie = await db.prepare('SELECT nombre FROM usuarios WHERE id = ?').get(caddie_id);
+        const caddieNombre = caddie ? caddie.nombre : `ID #${caddie_id}`;
+        res.locals.customLogAccion = `Asignó Backup Manual a ${caddieNombre} (${deporte || 'General'} - ${fecha} turno ${turno})`;
+        res.locals.customLogDetalles = { caddie: caddieNombre, fecha, deporte: deporte || 'General', turno, caddie_id };
+
         await db.prepare(`INSERT INTO backups_programados (fecha, deporte, turno, caddie_id) VALUES (?, ?, ?, ?)`).run(fecha, deporte || 'Tenis', turno, caddie_id);
         res.json({ success: true });
     } catch (error) {
@@ -1820,6 +1833,14 @@ app.post('/api/backups/manual', async (req, res) => {
 app.put('/api/backups/:id', async (req, res) => {
     const { caddie_id } = req.body;
     try {
+        const prevBackup = await db.prepare('SELECT b.*, u.nombre as caddie_nombre FROM backups_programados b JOIN usuarios u ON b.caddie_id = u.id WHERE b.id = ?').get(req.params.id);
+        const newCaddie = await db.prepare('SELECT nombre FROM usuarios WHERE id = ?').get(caddie_id);
+        const newName = newCaddie ? newCaddie.nombre : `ID #${caddie_id}`;
+        if (prevBackup) {
+            res.locals.customLogAccion = `Modificó Backup (${prevBackup.deporte || 'General'} - ${prevBackup.fecha}): ${prevBackup.caddie_nombre} ➔ ${newName}`;
+            res.locals.customLogDetalles = { anterior: prevBackup.caddie_nombre, nuevo: newName, fecha: prevBackup.fecha, deporte: prevBackup.deporte, turno: prevBackup.turno };
+        }
+
         await db.prepare(`UPDATE backups_programados SET caddie_id = ? WHERE id = ?`).run(caddie_id, req.params.id);
         res.json({ success: true });
     } catch (error) {
@@ -1829,6 +1850,11 @@ app.put('/api/backups/:id', async (req, res) => {
 
 app.delete('/api/backups/:id', async (req, res) => {
     try {
+        const backup = await db.prepare('SELECT b.*, u.nombre as caddie_nombre FROM backups_programados b JOIN usuarios u ON b.caddie_id = u.id WHERE b.id = ?').get(req.params.id);
+        if (backup) {
+            res.locals.customLogAccion = `Eliminó Backup: ${backup.caddie_nombre} (${backup.deporte || 'General'} - ${backup.fecha} turno ${backup.turno})`;
+            res.locals.customLogDetalles = { caddie: backup.caddie_nombre, fecha: backup.fecha, deporte: backup.deporte, turno: backup.turno, backup_id: req.params.id };
+        }
         await db.prepare(`DELETE FROM backups_programados WHERE id = ?`).run(req.params.id);
         res.json({ success: true });
     } catch (error) {
