@@ -131,6 +131,18 @@ async function initDB() {
 }
 initDB();
 
+// --- LIMPIEZA AUTOMÁTICA DE AUDITORÍA (Ventana deslizante de 30 días) ---
+const limpiarLogsViejos = async () => {
+    try {
+        await db.prepare("DELETE FROM logs_auditoria WHERE fecha < DATE_SUB(NOW(), INTERVAL 30 DAY)").run();
+        console.log('🧹 [AUDITORÍA] Limpieza automática ejecutada: registros anteriores a 30 días depurados.');
+    } catch (e) {
+        console.error('Error en limpieza de auditoría:', e.message);
+    }
+};
+limpiarLogsViejos();
+setInterval(limpiarLogsViejos, 24 * 60 * 60 * 1000); // Cada 24 horas
+
 app.use(cors());
 app.use(express.json());
 
@@ -161,85 +173,91 @@ app.use(async (req, res, next) => {
             res.on('finish', async () => {
                 if (res.statusCode >= 200 && res.statusCode < 300) {
                     let accion = `${req.method} ${req.path}`;
+                    let logDetalles = req.body;
                     let match;
                     let targetName = '';
                     let targetId = '';
-                    
-                    try {
-                        const idMatch = req.path.match(/\/(\d+)(\/|$)/);
-                        if (idMatch && idMatch[1]) {
-                            targetId = idMatch[1];
-                            if (req.path.includes('/usuarios') || req.path.includes('/caddies')) {
-                                const u = await db.prepare('SELECT nombre FROM usuarios WHERE id = ?').get(targetId);
-                                if (u) targetName = u.nombre;
-                            } else if (req.path.includes('/servicios')) {
-                                // Check if delete stored details in res.locals before the row was removed
-                                if (res.locals && res.locals.deletedServiceInfo) {
-                                    const info = res.locals.deletedServiceInfo;
-                                    targetName = `${info.jugador} | ${info.deporte} | ${info.fecha} ${info.hora}${info.caddie ? ' | Caddie: ' + info.caddie : ''}`;
-                                } else {
-                                    const s = await db.prepare('SELECT u.nombre as caddie_nombre, u2.nombre as jugador_nombre, srv.hora_inicio_programada, srv.fecha_servicio, srv.deporte FROM servicios srv LEFT JOIN usuarios u ON srv.caddie_id = u.id JOIN usuarios u2 ON srv.socio_id = u2.id WHERE srv.id = ?').get(targetId);
-                                    if (s) targetName = `${s.jugador_nombre} | ${s.deporte} | ${s.fecha_servicio} ${s.hora_inicio_programada}${s.caddie_nombre ? ' | Caddie: ' + s.caddie_nombre : ''}`;
-                                }
-                            } else if (req.path.includes('/backups')) {
-                                const b = await db.prepare('SELECT u.nombre FROM backups_programados b JOIN usuarios u ON b.caddie_id = u.id WHERE b.id = ?').get(targetId);
-                                if (b) targetName = `(Backup asignado a: ${b.nombre})`;
-                            }
-                        } else if (req.path === '/api/backups/manual' && req.body && req.body.caddie_id) {
-                            const u = await db.prepare('SELECT nombre FROM usuarios WHERE id = ?').get(req.body.caddie_id);
-                            if (u) {
-                                targetName = u.nombre;
-                                targetId = req.body.caddie_id;
-                            }
-                        }
-                    } catch (e) {}
 
-                    let targetStr = targetName ? targetName : (targetId ? `ID #${targetId}` : '');
-
-                    if (req.path === '/api/servicios' && req.method === 'POST') accion = `Creó un nuevo turno para ${req.body.deporte || 'un deporte'}`;
-                    else if ((match = req.path.match(/^\/api\/servicios\/(\d+)$/)) && req.method === 'DELETE') accion = `Eliminó el turno: ${targetStr}`;
-                    else if ((match = req.path.match(/^\/api\/servicios\/(\d+)\/estado$/)) && req.method === 'PATCH') accion = `Cambió el estado del turno ${targetStr} a '${req.body.estado || 'Desconocido'}'`;
-                    else if ((match = req.path.match(/^\/api\/servicios\/(\d+)\/hora$/)) && req.method === 'PUT') accion = `Cambió la hora del turno ${targetStr} a '${req.body.hora || ''}'`;
-                    else if ((match = req.path.match(/^\/api\/servicios\/(\d+)\/confirmar$/))) accion = `Confirmó/Rechazó o Reasignó el turno ${targetStr}`;
-                    else if (req.path === '/api/caddies' && req.method === 'POST') accion = `Registró al nuevo Caddie: ${req.body.nombre || ''}`;
-                    else if ((match = req.path.match(/^\/api\/caddies\/(\d+)$/)) && req.method === 'PUT') accion = `Editó los datos de ${targetStr}`;
-                    else if ((match = req.path.match(/^\/api\/usuarios\/(\d+)$/)) && req.method === 'PUT') {
-                        if (req.body.estado) accion = `Cambió el estado a '${req.body.estado}' para ${targetStr}`;
-                        else accion = `Editó los datos de ${targetStr}`;
-                    }
-                    else if ((match = req.path.match(/^\/api\/caddies\/(\d+)\/horario$/)) && req.method === 'PUT') {
-                        let diasActivos = [];
-                        if (req.body && req.body.horario && Array.isArray(req.body.horario)) {
-                            const nombresDias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-                            req.body.horario.forEach(diaInfo => {
-                                if (diaInfo.manana || diaInfo.tarde || (diaInfo.horas_disponibles && diaInfo.horas_disponibles.length > 0)) {
-                                    if (nombresDias[diaInfo.dia]) diasActivos.push(nombresDias[diaInfo.dia]);
-                                }
-                            });
-                        }
-                        const diasStr = diasActivos.length > 0 ? ` (Días activos: ${diasActivos.join(', ')})` : ' (Sin días activos)';
-                        accion = `Actualizó el horario semanal de ${targetStr}${diasStr}`;
-                    }
-                    else if ((match = req.path.match(/^\/api\/caddies\/(\d+)\/estado$/)) && req.method === 'PATCH') accion = `Cambió el estado a '${req.body.estado}' de ${targetStr}`;
-                    else if ((match = req.path.match(/^\/api\/caddies\/(\d+)$/)) && req.method === 'DELETE') accion = `Eliminó a ${targetStr}`;
-                    else if (req.path === '/api/perfil/estado-club' && req.method === 'POST') accion = `Marcó Entrada/Salida de Caddie en el Club`;
-                    else if (req.path === '/api/backups' && req.method === 'POST') accion = `Programó Backups Inteligentes para la fecha: ${req.body.fecha || ''}`;
-                    else if (req.path === '/api/backups/manual' && req.method === 'POST') accion = `Asignó Backup Manual a ${targetStr}`;
-                    else if ((match = req.path.match(/^\/api\/backups\/(\d+)$/)) && req.method === 'DELETE') accion = `Eliminó Backup ${targetStr}`;
-                    else if ((match = req.path.match(/^\/api\/backups\/(\d+)$/)) && req.method === 'PUT') {
-                        let newName = req.body.caddie_id;
+                    if (res.locals && res.locals.customLogAccion) {
+                        accion = res.locals.customLogAccion;
+                        if (res.locals.customLogDetalles) logDetalles = res.locals.customLogDetalles;
+                    } else {
                         try {
-                           const u = await db.prepare('SELECT nombre FROM usuarios WHERE id = ?').get(req.body.caddie_id);
-                           if (u) newName = u.nombre;
-                        } catch(e) {}
-                        accion = `Modificó Backup ${targetStr} (Nuevo Caddie: ${newName})`;
+                            const idMatch = req.path.match(/\/(\d+)(\/|$)/);
+                            if (idMatch && idMatch[1]) {
+                                targetId = idMatch[1];
+                                if (req.path.includes('/usuarios') || req.path.includes('/caddies')) {
+                                    const u = await db.prepare('SELECT nombre FROM usuarios WHERE id = ?').get(targetId);
+                                    if (u) targetName = u.nombre;
+                                } else if (req.path.includes('/servicios')) {
+                                    // Check if delete stored details in res.locals before the row was removed
+                                    if (res.locals && res.locals.deletedServiceInfo) {
+                                        const info = res.locals.deletedServiceInfo;
+                                        targetName = `${info.jugador} | ${info.deporte} | ${info.fecha} ${info.hora}${info.caddie ? ' | Caddie: ' + info.caddie : ''}`;
+                                    } else {
+                                        const s = await db.prepare('SELECT u.nombre as caddie_nombre, u2.nombre as jugador_nombre, srv.hora_inicio_programada, srv.fecha_servicio, srv.deporte FROM servicios srv LEFT JOIN usuarios u ON srv.caddie_id = u.id JOIN usuarios u2 ON srv.socio_id = u2.id WHERE srv.id = ?').get(targetId);
+                                        if (s) targetName = `${s.jugador_nombre} | ${s.deporte} | ${s.fecha_servicio} ${s.hora_inicio_programada}${s.caddie_nombre ? ' | Caddie: ' + s.caddie_nombre : ''}`;
+                                    }
+                                } else if (req.path.includes('/backups')) {
+                                    const b = await db.prepare('SELECT u.nombre FROM backups_programados b JOIN usuarios u ON b.caddie_id = u.id WHERE b.id = ?').get(targetId);
+                                    if (b) targetName = `(Backup asignado a: ${b.nombre})`;
+                                }
+                            } else if (req.path === '/api/backups/manual' && req.body && req.body.caddie_id) {
+                                const u = await db.prepare('SELECT nombre FROM usuarios WHERE id = ?').get(req.body.caddie_id);
+                                if (u) {
+                                    targetName = u.nombre;
+                                    targetId = req.body.caddie_id;
+                                }
+                            }
+                        } catch (e) {}
+
+                        let targetStr = targetName ? targetName : (targetId ? `ID #${targetId}` : '');
+
+                        if (req.path === '/api/servicios' && req.method === 'POST') accion = `Creó un nuevo turno para ${req.body.deporte || 'un deporte'}`;
+                        else if ((match = req.path.match(/^\/api\/servicios\/(\d+)$/)) && req.method === 'DELETE') accion = `Eliminó el turno: ${targetStr}`;
+                        else if ((match = req.path.match(/^\/api\/servicios\/(\d+)\/estado$/)) && req.method === 'PATCH') accion = `Cambió el estado del turno ${targetStr} a '${req.body.estado || 'Desconocido'}'`;
+                        else if ((match = req.path.match(/^\/api\/servicios\/(\d+)\/hora$/)) && req.method === 'PUT') accion = `Cambió la hora del turno ${targetStr} a '${req.body.hora || ''}'`;
+                        else if ((match = req.path.match(/^\/api\/servicios\/(\d+)\/confirmar$/))) accion = `Confirmó/Rechazó o Reasignó el turno ${targetStr}`;
+                        else if (req.path === '/api/caddies' && req.method === 'POST') accion = `Registró al nuevo Caddie: ${req.body.nombre || ''}`;
+                        else if ((match = req.path.match(/^\/api\/caddies\/(\d+)$/)) && req.method === 'PUT') accion = `Editó los datos de ${targetStr}`;
+                        else if ((match = req.path.match(/^\/api\/usuarios\/(\d+)$/)) && req.method === 'PUT') {
+                            if (req.body.estado) accion = `Cambió el estado a '${req.body.estado}' para ${targetStr}`;
+                            else accion = `Editó los datos de ${targetStr}`;
+                        }
+                        else if ((match = req.path.match(/^\/api\/caddies\/(\d+)\/horario$/)) && req.method === 'PUT') {
+                            let diasActivos = [];
+                            if (req.body && req.body.horario && Array.isArray(req.body.horario)) {
+                                const nombresDias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+                                req.body.horario.forEach(diaInfo => {
+                                    if (diaInfo.manana || diaInfo.tarde || (diaInfo.horas_disponibles && diaInfo.horas_disponibles.length > 0)) {
+                                        if (nombresDias[diaInfo.dia]) diasActivos.push(nombresDias[diaInfo.dia]);
+                                    }
+                                });
+                            }
+                            const diasStr = diasActivos.length > 0 ? ` (Días activos: ${diasActivos.join(', ')})` : ' (Sin días activos)';
+                            accion = `Actualizó el horario semanal de ${targetStr}${diasStr}`;
+                        }
+                        else if ((match = req.path.match(/^\/api\/caddies\/(\d+)\/estado$/)) && req.method === 'PATCH') accion = `Cambió el estado a '${req.body.estado}' de ${targetStr}`;
+                        else if ((match = req.path.match(/^\/api\/caddies\/(\d+)$/)) && req.method === 'DELETE') accion = `Eliminó a ${targetStr}`;
+                        else if (req.path === '/api/perfil/estado-club' && req.method === 'POST') accion = `Marcó Entrada/Salida de Caddie en el Club`;
+                        else if (req.path === '/api/backups' && req.method === 'POST') accion = `Programó Backups Inteligentes para la fecha: ${req.body.fecha || ''}`;
+                        else if (req.path === '/api/backups/manual' && req.method === 'POST') accion = `Asignó Backup Manual a ${targetStr}`;
+                        else if ((match = req.path.match(/^\/api\/backups\/(\d+)$/)) && req.method === 'DELETE') accion = `Eliminó Backup ${targetStr}`;
+                        else if ((match = req.path.match(/^\/api\/backups\/(\d+)$/)) && req.method === 'PUT') {
+                            let newName = req.body.caddie_id;
+                            try {
+                               const u = await db.prepare('SELECT nombre FROM usuarios WHERE id = ?').get(req.body.caddie_id);
+                               if (u) newName = u.nombre;
+                            } catch(e) {}
+                            accion = `Modificó Backup ${targetStr} (Nuevo Caddie: ${newName})`;
+                        }
+                        else if (req.path === '/api/importar-horario' && req.method === 'POST') accion = `Importó turnos desde un archivo Excel`;
+                        else if ((match = req.path.match(/^\/api\/servicios\/(\d+)\/asignar$/)) && req.method === 'PATCH') accion = `Reasignó/Asignó un Caddie al turno ${targetStr}`;
+                        else if ((match = req.path.match(/^\/api\/canchas\/asignar$/)) && req.method === 'POST') accion = `Asignó un Caddie a una Cancha completa`;
+                        else if ((match = req.path.match(/^\/api\/canchas\/asignaciones\/tarde$/)) && req.method === 'PATCH') accion = `Asignó un Caddie a una Cancha para el turno tarde`;
                     }
-                    else if (req.path === '/api/importar-horario' && req.method === 'POST') accion = `Importó turnos desde un archivo Excel`;
-                    else if ((match = req.path.match(/^\/api\/servicios\/(\d+)\/asignar$/)) && req.method === 'PATCH') accion = `Reasignó/Asignó un Caddie al turno ${targetStr}`;
-                    else if ((match = req.path.match(/^\/api\/canchas\/asignar$/)) && req.method === 'POST') accion = `Asignó un Caddie a una Cancha completa`;
-                    else if ((match = req.path.match(/^\/api\/canchas\/asignaciones\/tarde$/)) && req.method === 'PATCH') accion = `Asignó un Caddie a una Cancha para el turno tarde`;
                     
-                    await registrarLog(adminNombre, adminRol, accion, req.body);
+                    await registrarLog(adminNombre, adminRol, accion, logDetalles);
                 }
             });
         }
@@ -643,7 +661,31 @@ app.post('/api/cronograma/tenis-fin-semana', async (req, res) => {
         });
 
         const resultado = await transaction();
-        res.json({ success: true, message: `Cronograma generado: ${resultado.asignados} canchas asignadas.`, data: resultado });
+
+        // Obtener resumen de turnos no asignados restantes para informar el motivo exacto en el log
+        let unassignedRemaining = [];
+        try {
+            unassignedRemaining = await db.prepare(
+                "SELECT s.hora_inicio_programada, u.nombre as jugador_nombre FROM servicios s JOIN usuarios u ON s.socio_id = u.id WHERE s.fecha_servicio = ? AND s.caddie_id IS NULL AND s.estado IN ('Pendiente', 'En Juego')"
+            ).all(fecha);
+        } catch(e) {}
+
+        let unassignedText = '';
+        if (unassignedRemaining.length > 0) {
+            unassignedText = ` | ❌ ${unassignedRemaining.length} sin caddie disponible (${unassignedRemaining.map(t => `${t.hora_inicio_programada} ${t.jugador_nombre}`).slice(0, 3).join(', ')}${unassignedRemaining.length > 3 ? '...' : ''})`;
+        }
+
+        const totalAsignados = resultado.asignadosCount !== undefined ? resultado.asignadosCount : (resultado.asignados || 0);
+        res.locals.customLogAccion = `🤖 Asignación Inteligente (${deporte || 'Todos'} - ${fecha}): ${totalAsignados} asignaciones realizadas${unassignedText}`;
+        res.locals.customLogDetalles = {
+            fecha,
+            deporte: deporte || 'Todos',
+            turnosAsignados: totalAsignados,
+            sinAsignarCount: unassignedRemaining.length,
+            turnosSinAsignar: unassignedRemaining
+        };
+
+        res.json({ success: true, message: `Cronograma generado: ${totalAsignados} asignaciones realizadas.`, data: resultado });
 
     } catch (error) {
         console.error(error);
@@ -2500,6 +2542,14 @@ app.post('/api/importar-horario', upload.single('file'), async (req, res) => {
         
         log(`✅ [IMPORT] Finalizado exitosamente. ${importedCount} servicios nuevos.`);
         
+        res.locals.customLogAccion = `📥 Importó Excel (${deporte}): ${importedCount} turnos procesados (${dataRows.length} filas en archivo${errors.length > 0 ? `, ${errors.length} saltados` : ''})`;
+        res.locals.customLogDetalles = {
+            deporte,
+            totalFilasExcel: dataRows.length,
+            turnosProcesados: importedCount,
+            erroresOSaltados: errors
+        };
+
         res.json({ 
             success: true, 
             message: importedCount === 0 && errors.length > 0 
