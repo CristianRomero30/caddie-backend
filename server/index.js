@@ -351,9 +351,10 @@ app.get('/api/roles', async (req, res) => {
 // Listar caddies filtrados por deporte si se especifica
 app.get('/api/caddies', async (req, res) => {
     const { deporte, estado } = req.query;
+    let query = '';
+    let params = [];
     try {
         let conditions = ["u.rol_id = 4"];
-        let params = [];
 
         if (deporte && deporte !== 'Ambos') {
             conditions.push("(u.deporte = ? OR u.deporte = 'Ambos')");
@@ -365,7 +366,7 @@ app.get('/api/caddies', async (req, res) => {
             params.push(estado);
         }
 
-        let query = `
+        query = `
             SELECT 
                 u.id, u.nombre, u.email, u.estado, u.deporte,
                 p.horas_acumuladas, p.calificacion, p.disponibilidad, p.esta_en_club, p.fecha_entrada_club, p.turno_backup, p.deporte_backup,
@@ -394,8 +395,6 @@ app.get('/api/caddies', async (req, res) => {
         res.json(result);
     } catch (error) {
         console.error('ERROR API CADDIES:', error.message);
-        console.error('QUERY WAS:', query);
-        console.error('PARAMS WERE:', params);
         res.status(500).json({ success: false, message: 'Error recuperando caddies', detail: error.message, stack: error.stack });
     }
 });
