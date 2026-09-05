@@ -337,8 +337,13 @@ app.post('/api/auth/login', async (req, res) => {
 
 // Obtener roles
 app.get('/api/roles', async (req, res) => {
-    const roles = await db.prepare('SELECT * FROM roles').all();
-    res.json(roles);
+    try {
+        const roles = await db.prepare('SELECT * FROM roles').all();
+        res.json(roles);
+    } catch (error) {
+        console.error('ERROR API ROLES:', error);
+        res.status(500).json({ success: false, message: 'Error recuperando roles', detail: error.message, code: error.code });
+    }
 });
 
 // --- MÓDULO DE CADDIES ---
@@ -793,7 +798,7 @@ app.get('/api/servicios', async (req, res) => {
         const servicios = await db.prepare(query).all(...params);
         res.json(servicios);
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Error recuperando servicios' });
+        res.status(500).json({ success: false, message: 'Error recuperando servicios', detail: error.message, code: error.code });
     }
 });
 
