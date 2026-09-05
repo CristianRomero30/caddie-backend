@@ -129,7 +129,7 @@ async function initDB() {
     try { await db.prepare('ALTER TABLE servicios ADD COLUMN nombre_boliador TEXT').run(); } catch (e) {}
     try { await db.prepare('ALTER TABLE horarios_caddie ADD COLUMN horas_disponibles JSON').run(); } catch (e) {}
 }
-initDB();
+initDB().catch(e => console.error('⚠️ [initDB] Error:', e.message));
 
 // --- LIMPIEZA AUTOMÁTICA DE AUDITORÍA (Ventana deslizante de 30 días) ---
 const limpiarLogsViejos = async () => {
@@ -140,7 +140,7 @@ const limpiarLogsViejos = async () => {
         console.error('Error en limpieza de auditoría:', e.message);
     }
 };
-limpiarLogsViejos();
+limpiarLogsViejos().catch(e => console.error('⚠️ [limpiarLogsViejos] Error:', e.message));
 setInterval(limpiarLogsViejos, 24 * 60 * 60 * 1000); // Cada 24 horas
 
 app.use(cors());
