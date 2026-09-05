@@ -2625,21 +2625,21 @@ const ejecutarMantenimiento = async () => {
         const hoy = getLocalDate();
         
         // 1. Auto-completar servicios que quedaron "En Juego" de días anteriores
-        const stuckInPlay = db.prepare(`
+        const stuckInPlay = await db.prepare(`
             SELECT id, caddie_id FROM servicios 
             WHERE estado = 'En Juego' AND fecha_servicio < ?
         `).all(hoy);
 
-        if (stuckInPlay.length > 0) {
+        if (stuckInPlay && stuckInPlay.length > 0) {
             const updateStmt = await db.prepare("UPDATE servicios SET estado = 'Completado', observaciones = COALESCE(observaciones, '') || ' [Auto-Completado por Sistema]' WHERE id = ?");
-            const creditHoursStmt = db.prepare("UPDATE perfiles_caddie SET horas_acumuladas = horas_acumuladas + 4.5 WHERE usuario_id = ?");
-            const logIncidencia = db.prepare("INSERT INTO incidencias (tipo, descripcion, reportado_por_id, servicio_id) VALUES ('Sistema', 'Cierre automático de turno tras 24h sin finalizar', 1, ?)");
+            const creditHoursStmt = await db.prepare("UPDATE perfiles_caddie SET horas_acumuladas = horas_acumuladas + 4.5 WHERE usuario_id = ?");
+            const logIncidencia = await db.prepare("INSERT INTO incidencias (tipo, descripcion, reportado_por_id, servicio_id) VALUES ('Sistema', 'Cierre automático de turno tras 24h sin finalizar', 1, ?)");
 
-            const transaction = db.transaction((servicios) => {
+            const transaction = db.transaction(async (servicios) => {
                 for (const s of servicios) {
-                    updateStmt.run(s.id);
-                    if (s.caddie_id) creditHoursStmt.run(s.caddie_id);
-                    logIncidencia.run(s.id);
+                    await updateStmt.run(s.id);
+                    if (s.caddie_id) await creditHoursStmt.run(s.caddie_id);
+                    await logIncidencia.run(s.id);
                 }
             });
             await transaction(stuckInPlay);
@@ -2647,19 +2647,19 @@ const ejecutarMantenimiento = async () => {
         }
 
         // 2. Marcar como "Cancelado" servicios "Pendientes" de días anteriores
-        const oldPending = db.prepare("UPDATE servicios SET estado = 'Cancelado' WHERE estado = 'Pendiente' AND fecha_servicio < ?").run(hoy);
-        if (oldPending.changes > 0) {
+        const oldPending = await db.prepare("UPDATE servicios SET estado = 'Cancelado' WHERE estado = 'Pendiente' AND fecha_servicio < ?").run(hoy);
+        if (oldPending && oldPending.changes > 0) {
             console.log(`✅ Se marcaron como Cancelados ${oldPending.changes} turnos no tomados de días anteriores.`);
         }
 
     } catch (error) {
-        console.error('❌ Error en mantenimiento:', error);
+        console.error('❌ Error en mantenimiento:', error.message);
     }
 };
 
 // Ejecutar al iniciar y cada hora
-ejecutarMantenimiento();
-setInterval(ejecutarMantenimiento, 1000 * 60 * 60);
+ejecutarMantenimiento().catch(err => console.error('❌ Error en mantenimiento inicial:', err.message));
+setInterval(() => ejecutarMantenimiento().catch(err => console.error('❌ Error en mantenimiento periódico:', err.message)), 1000 * 60 * 60);
 
 // --- AUTO-INICIO DE TURNOS ---
 async function ejecutarIniciosAutomaticos() {
@@ -2683,7 +2683,7 @@ async function ejecutarIniciosAutomaticos() {
         `).all(hoy, ahora);
 
         if (serviciosParaIniciar && serviciosParaIniciar.length > 0) {
-            const updateStmt = db.prepare("UPDATE servicios SET estado = 'En Juego', hora_inicio_real = COALESCE(hora_inicio_real, ?) WHERE id = ?");
+            const updateStmt = await db.prepare("UPDATE servicios SET estado = 'En Juego', hora_inicio_real = COALESCE(hora_inicio_real, ?) WHERE id = ?");
             await db.transaction(async (servicios) => {
                 for (const s of servicios) {
                     await updateStmt.run(ahora, s.id);
@@ -2692,11 +2692,11 @@ async function ejecutarIniciosAutomaticos() {
             console.log(`✅ [AUTO-INICIO] Se iniciaron automáticamente ${serviciosParaIniciar.length} turnos.`);
         }
     } catch (e) {
-        console.error('Error en inicio automático de turnos:', e);
+        console.error('Error en inicio automático de turnos:', e.message);
     }
 }
-setInterval(ejecutarIniciosAutomaticos, 1000 * 60);
-setTimeout(ejecutarIniciosAutomaticos, 5000); // Check shortly after startup
+setInterval(() => ejecutarIniciosAutomaticos().catch(err => console.error('❌ Error en inicios automáticos:', err.message)), 1000 * 60);
+setTimeout(() => ejecutarIniciosAutomaticos().catch(err => console.error('❌ Error en inicio inicial:', err.message)), 5000); // Check shortly after startup
 
 
 // --- CATCH ALL para el frontend ---
